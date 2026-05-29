@@ -1,442 +1,409 @@
-import React, { useState } from 'react';
-import { 
-  ArrowRight, Copy, CheckCircle, FileText, AlertCircle, 
-  List, Type, FileOutput, Settings, HelpCircle, X, 
-  Info, Trash2, Zap 
-} from 'lucide-react';
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState('layout'); // 'layout', 'words', 'govForm'
-  const [inputText, setInputText] = useState('');
-  const [outputText, setOutputText] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
-
-  // --- デモ・ガイド用の状態 ---
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settingsMessage, setSettingsMessage] = useState({ text: '', type: '' });
-
-  // --- タブ2用の設定状態 ---
-  const [replaceKou, setReplaceKou] = useState('');
-  const [replaceOtsu, setReplaceOtsu] = useState('');
-  const [fixKanas, setFixKanas] = useState(true);
-
-  // --- タブ3用の設定状態 ---
-  const [charsPerLine, setCharsPerLine] = useState(35);
-
-  // 1. レイアウト整形
-  const formatLayout = (text) => {
-    const lines = text.split('\n');
-    let currentIndentLevel = 0;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法務テキスト整形・統一アシスタント</title>
     
-    return lines.map(line => {
-      let trimmed = line.replace(/^[ \t　]+/, '');
-      if (trimmed.length === 0) return '';
+    <!-- スタイル（Tailwind CSS）とReact本体を読み込む -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- ブラウザ内でReact(JSX)を動かすための翻訳機 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+    
+    <!-- アプリが表示される場所 -->
+    <div id="root"></div>
 
-      if (/^第[一二三四五六七八九十百千0-9０-９]+[章節条]/.test(trimmed)) {
-        currentIndentLevel = 0;
-      } else if (/^[0-9０-９]+[\.．\s]/.test(trimmed) || /^第[一二三四五六七八九十百千0-9０-９]+項/.test(trimmed)) {
-        currentIndentLevel = 1;
-      } else if (/^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮]/.test(trimmed) || /^[0-9０-９]+[)）]/.test(trimmed) || /^第[一二三四五六七八九十百千0-9０-９]+号/.test(trimmed)) {
-        currentIndentLevel = 2;
-      } else if (/^[(（]?[ア-ンあ-ん][)）]?[、\.\s]/.test(trimmed) || /^[ア-ンあ-ん][、\.]/.test(trimmed)) {
-        currentIndentLevel = 3;
-      } else {
-        if (currentIndentLevel === 0) currentIndentLevel = 1;
-      }
+    <!-- ここからがアプリのプログラム -->
+    <script type="text/babel">
+        const { useState } = React;
 
-      const indentSpace = '　'.repeat(currentIndentLevel);
-      return indentSpace + trimmed;
-    }).join('\n');
-  };
+        // --- アイコンの設定（文字化けや読み込みエラーを防ぐため図形として直接定義） ---
+        const Icon = ({ children, className }) => (
+          <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {children}
+          </svg>
+        );
+        const ArrowRight = ({className}) => <Icon className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Icon>;
+        const Copy = ({className}) => <Icon className={className}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></Icon>;
+        const CheckCircle = ({className}) => <Icon className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></Icon>;
+        const FileText = ({className}) => <Icon className={className}><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></Icon>;
+        const AlertCircle = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></Icon>;
+        const List = ({className}) => <Icon className={className}><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></Icon>;
+        const Type = ({className}) => <Icon className={className}><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></Icon>;
+        const FileOutput = ({className}) => <Icon className={className}><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></Icon>;
+        const Settings = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></Icon>;
+        const HelpCircle = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></Icon>;
+        const X = ({className}) => <Icon className={className}><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></Icon>;
+        const Info = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></Icon>;
+        const Trash2 = ({className}) => <Icon className={className}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
+        const Zap = ({className}) => <Icon className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></Icon>;
 
-  // 2. 用語・表記の統一
-  const formatWords = (text) => {
-    let result = text;
-    if (replaceKou) result = result.replace(/甲/g, replaceKou);
-    if (replaceOtsu) result = result.replace(/乙/g, replaceOtsu);
-    if (fixKanas) {
-      result = result.replace(/及び/g, 'および').replace(/並びに/g, 'ならびに')
-                   .replace(/又は/g, 'または').replace(/若しくは/g, 'もしくは')
-                   .replace(/従って/g, 'したがって').replace(/但し/g, 'ただし');
-    }
-    return result;
-  };
+        // --- メインアプリ ---
+        function App() {
+          const [activeTab, setActiveTab] = useState('layout');
+          const [inputText, setInputText] = useState('');
+          const [outputText, setOutputText] = useState('');
+          const [isCopied, setIsCopied] = useState(false);
 
-  // 3. 役所フォーマット対策
-  const formatForGov = (text, limit) => {
-    const flatText = text.replace(/\n/g, '');
-    let result = '';
-    for (let i = 0; i < flatText.length; i += limit) {
-      result += flatText.substring(i, i + limit) + '\n';
-    }
-    return result.trim();
-  };
+          // デモ・ガイド用の状態
+          const [isGuideOpen, setIsGuideOpen] = useState(false);
+          const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+          const [settingsMessage, setSettingsMessage] = useState({ text: '', type: '' });
 
-  const handleProcess = () => {
-    if (!inputText.trim()) return;
+          // タブ2用の設定状態
+          const [replaceKou, setReplaceKou] = useState('');
+          const [replaceOtsu, setReplaceOtsu] = useState('');
+          const [fixKanas, setFixKanas] = useState(true);
 
-    let resultText = '';
-    if (activeTab === 'layout') resultText = formatLayout(inputText);
-    else if (activeTab === 'words') resultText = formatWords(inputText);
-    else if (activeTab === 'govForm') {
-      const limit = parseInt(charsPerLine, 10);
-      if (isNaN(limit) || limit < 1) return;
-      resultText = formatForGov(inputText, limit);
-    }
+          // タブ3用の設定状態
+          const [charsPerLine, setCharsPerLine] = useState(35);
 
-    setOutputText(resultText);
-    setIsCopied(false);
-  };
+          const formatLayout = (text) => {
+            const lines = text.split('\n');
+            let currentIndentLevel = 0;
+            
+            return lines.map(line => {
+              let trimmed = line.replace(/^[ \t　]+/, '');
+              if (trimmed.length === 0) return '';
 
-  const handleCopy = async () => {
-    if (!outputText) return;
-    try {
-      await navigator.clipboard.writeText(outputText);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch (err) {
-      const textArea = document.createElement("textarea");
-      textArea.value = outputText;
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-      } catch (e) {}
-      document.body.removeChild(textArea);
-    }
-  };
+              if (/^第[一二三四五六七八九十百千0-9０-９]+[章節条]/.test(trimmed)) {
+                currentIndentLevel = 0;
+              } else if (/^[0-9０-９]+[\.．\s]/.test(trimmed) || /^第[一二三四五六七八九十百千0-9０-９]+項/.test(trimmed)) {
+                currentIndentLevel = 1;
+              } else if (/^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮]/.test(trimmed) || /^[0-9０-９]+[)）]/.test(trimmed) || /^第[一二三四五六七八九十百千0-9０-９]+号/.test(trimmed)) {
+                currentIndentLevel = 2;
+              } else if (/^[(（]?[ア-ンあ-ん][)）]?[、\.\s]/.test(trimmed) || /^[ア-ンあ-ん][、\.]/.test(trimmed)) {
+                currentIndentLevel = 3;
+              } else {
+                if (currentIndentLevel === 0) currentIndentLevel = 1;
+              }
 
-  const insertSample = () => {
-    if (activeTab === 'layout') {
-      setInputText(`第1条（目的）\n甲は乙に対し業務を委託する。\n2 乙は善良なる管理者として遂行する。`);
-    } else if (activeTab === 'words') {
-      setInputText(`甲及び乙は、本契約を締結する。\n但し、甲又は乙のいずれかが解除を申し出た場合はこの限りではない。`);
-    } else if (activeTab === 'govForm') {
-      setInputText(`本件について申請者は、令和〇年〇月〇日に発生した事象に関して、関係各所との調整を重ねた結果、別紙の通り事業計画を変更する必要があると判断いたしました。つきましては、変更後の計画に基づき、速やかに必要な手続きを進める所存であります。`);
-    }
-  };
+              const indentSpace = '　'.repeat(currentIndentLevel);
+              return indentSpace + trimmed;
+            }).join('\n');
+          };
 
-  // デモデータ設定・クリア用のハンドラー
-  const handleLoadDemo = () => {
-    insertSample();
-    setSettingsMessage({ text: 'デモデータをセットしました。', type: 'success' });
-    setTimeout(() => setSettingsMessage({ text: '', type: '' }), 3000);
-  };
+          const formatWords = (text) => {
+            let result = text;
+            if (replaceKou) result = result.replace(/甲/g, replaceKou);
+            if (replaceOtsu) result = result.replace(/乙/g, replaceOtsu);
+            if (fixKanas) {
+              result = result.replace(/及び/g, 'および').replace(/並びに/g, 'ならびに')
+                           .replace(/又は/g, 'または').replace(/若しくは/g, 'もしくは')
+                           .replace(/従って/g, 'したがって').replace(/但し/g, 'ただし');
+            }
+            return result;
+          };
 
-  const handleClearData = () => {
-    setInputText('');
-    setOutputText('');
-    setSettingsMessage({ text: 'データをクリアしました。', type: 'info' });
-    setTimeout(() => setSettingsMessage({ text: '', type: '' }), 3000);
-  };
+          const formatForGov = (text, limit) => {
+            const flatText = text.replace(/\n/g, '');
+            let result = '';
+            for (let i = 0; i < flatText.length; i += limit) {
+              result += flatText.substring(i, i + limit) + '\n';
+            }
+            return result.trim();
+          };
 
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans relative">
-      {/* ヘッダー */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-          {/* 左側：タイトル */}
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
-              <FileText className="text-white w-6 h-6" />
-            </div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">リーガルテキスト・アシスタント</h1>
-          </div>
+          const handleProcess = () => {
+            if (!inputText.trim()) return;
 
-          {/* 右側：ガイド・設定ボタン */}
-          <div className="flex items-center gap-1 md:gap-3">
-            <button 
-              onClick={() => setIsGuideOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            >
-              <HelpCircle className="w-5 h-5" />
-              <span className="hidden md:inline">使い方ガイド</span>
-            </button>
-            <button 
-              onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="hidden md:inline">設定・デモ</span>
-            </button>
-          </div>
-        </div>
-        
-        {/* タブナビゲーション */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-wrap gap-1 mt-2">
-          <button 
-            onClick={() => {setActiveTab('layout'); setOutputText('');}}
-            className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'layout' ? 'bg-blue-600 text-white shadow-inner' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-          >
-            <List className="w-4 h-4" /> レイアウト・段落
-          </button>
-          <button 
-            onClick={() => {setActiveTab('words'); setOutputText('');}}
-            className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'words' ? 'bg-blue-600 text-white shadow-inner' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-          >
-            <Type className="w-4 h-4" /> 用語・表記の統一
-          </button>
-          <button 
-            onClick={() => {setActiveTab('govForm'); setOutputText('');}}
-            className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'govForm' ? 'bg-amber-600 text-white shadow-inner' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 border-b-0'}`}
-          >
-            <FileOutput className="w-4 h-4" /> 役所フォーマット対策
-          </button>
-        </div>
-      </header>
+            let resultText = '';
+            if (activeTab === 'layout') resultText = formatLayout(inputText);
+            else if (activeTab === 'words') resultText = formatWords(inputText);
+            else if (activeTab === 'govForm') {
+              const limit = parseInt(charsPerLine, 10);
+              if (isNaN(limit) || limit < 1) return;
+              resultText = formatForGov(inputText, limit);
+            }
 
-      <main className="max-w-6xl mx-auto p-4 md:p-8">
-        
-        {/* タブ固有の設定エリア */}
-        {activeTab === 'words' && (
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-6 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-700">甲を置換:</span>
-              <input type="text" placeholder="例: 買主" className="border border-slate-300 rounded px-2 py-1 text-sm w-32" value={replaceKou} onChange={e => setReplaceKou(e.target.value)} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-700">乙を置換:</span>
-              <input type="text" placeholder="例: 売主" className="border border-slate-300 rounded px-2 py-1 text-sm w-32" value={replaceOtsu} onChange={e => setReplaceOtsu(e.target.value)} />
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={fixKanas} onChange={e => setFixKanas(e.target.checked)} className="w-4 h-4 text-blue-600 rounded border-gray-300" />
-              <span className="text-sm font-bold text-slate-700">接続詞をひらがなに統一</span>
-            </label>
-          </div>
-        )}
+            setOutputText(resultText);
+            setIsCopied(false);
+          };
 
-        {activeTab === 'govForm' && (
-          <div className="bg-amber-50 p-4 rounded-xl shadow-sm border border-amber-200 mb-6">
-            <h3 className="font-bold text-amber-900 mb-2 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" /> 指定した文字数で強制的に改行を入れます
-            </h3>
-            <p className="text-amber-800 text-xs mb-3">
-              役所のWordフォーマットで「枠が広がる」「次のページに押し出される」のを防ぐため、指定の文字数でテキストを折り返します。
-            </p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-amber-900">1行あたりの最大文字数:</span>
-              <input 
-                type="number" 
-                min="10" max="100" 
-                className="border border-amber-300 rounded px-3 py-1 text-sm w-20 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono" 
-                value={charsPerLine} 
-                onChange={e => setCharsPerLine(e.target.value)} 
-              />
-              <span className="text-sm text-amber-900 font-bold">文字</span>
-            </div>
-          </div>
-        )}
+          const handleCopy = async () => {
+            if (!outputText) return;
+            try {
+              await navigator.clipboard.writeText(outputText);
+              setIsCopied(true);
+              setTimeout(() => setIsCopied(false), 2000);
+            } catch (err) {
+              const textArea = document.createElement("textarea");
+              textArea.value = outputText;
+              document.body.appendChild(textArea);
+              textArea.select();
+              try {
+                document.execCommand('copy');
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+              } catch (e) {}
+              document.body.removeChild(textArea);
+            }
+          };
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
-          
-          {/* 左側：入力エリア */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-sm font-bold text-slate-500">
-                {activeTab === 'govForm' ? '申請理由などの長文をベタ打ち' : '元のテキスト'}
-              </h2>
-            </div>
-            <textarea
-              className="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed text-sm"
-              placeholder="ここにテキストを貼り付けてください"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-            />
-          </div>
+          const insertSample = () => {
+            if (activeTab === 'layout') {
+              setInputText(`第1条（目的）\n甲は乙に対し業務を委託する。\n2 乙は善良なる管理者として遂行する。`);
+            } else if (activeTab === 'words') {
+              setInputText(`甲及び乙は、本契約を締結する。\n但し、甲又は乙のいずれかが解除を申し出た場合はこの限りではない。`);
+            } else if (activeTab === 'govForm') {
+              setInputText(`本件について申請者は、令和〇年〇月〇日に発生した事象に関して、関係各所との調整を重ねた結果、別紙の通り事業計画を変更する必要があると判断いたしました。つきましては、変更後の計画に基づき、速やかに必要な手続きを進める所存であります。`);
+            }
+          };
 
-          {/* 中央：変換ボタン */}
-          <div className="flex justify-center items-center py-4 lg:py-0">
-            <button
-              onClick={handleProcess}
-              disabled={!inputText.trim()}
-              className={`flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-md transition-all active:scale-95 disabled:bg-slate-300 ${
-                activeTab === 'govForm' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              <ArrowRight className="text-white w-6 h-6 lg:rotate-0 rotate-90" />
-            </button>
-          </div>
+          const handleLoadDemo = () => {
+            insertSample();
+            setSettingsMessage({ text: 'デモデータをセットしました。', type: 'success' });
+            setTimeout(() => setSettingsMessage({ text: '', type: '' }), 3000);
+          };
 
-          {/* 右側：出力エリア */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-sm font-bold text-slate-500">処理結果</h2>
-              <button
-                onClick={handleCopy}
-                disabled={!outputText}
-                className={`flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                  isCopied 
-                    ? 'bg-green-100 text-green-700' 
-                    : activeTab === 'govForm'
-                      ? 'bg-amber-700 hover:bg-amber-800 text-white disabled:bg-slate-300'
-                      : 'bg-slate-800 hover:bg-slate-700 text-white disabled:bg-slate-300'
-                }`}
-              >
-                {isCopied ? <><CheckCircle className="w-4 h-4" /> コピー完了</> : <><Copy className="w-4 h-4" /> コピー</>}
-              </button>
-            </div>
-            <div className="flex-1 relative">
-              <textarea
-                readOnly
-                className={`w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none leading-relaxed text-sm font-mono transition-opacity duration-300 ${isCopied ? 'opacity-30' : 'opacity-100'}`}
-                value={outputText}
-                style={activeTab === 'govForm' ? { wordBreak: 'break-all' } : {}}
-              />
-              
-              {/* 初期状態のプレースホルダー */}
-              {!outputText && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
-                  <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                  <p className="text-sm text-center">中央のボタンを押して<br/>処理を実行します</p>
-                </div>
-              )}
+          const handleClearData = () => {
+            setInputText('');
+            setOutputText('');
+            setSettingsMessage({ text: 'データをクリアしました。', type: 'info' });
+            setTimeout(() => setSettingsMessage({ text: '', type: '' }), 3000);
+          };
 
-              {/* コピー完了後のガイドとダウンロードボタン */}
-              {isCopied && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg border-2 border-green-500 p-4 text-center animate-in fade-in zoom-in duration-300 z-10">
-                  <div className="bg-green-100 p-3 rounded-full mb-3 shadow-sm">
-                    <CheckCircle className="w-8 h-8 text-green-600" />
+          return (
+            <div className="min-h-screen relative">
+              <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+                <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
+                      <FileText className="text-white w-6 h-6" />
+                    </div>
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">リーガルテキスト・アシスタント</h1>
                   </div>
-                  <h3 className="font-bold text-slate-800 text-lg mb-2">クリップボードにコピーしました</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                    以下の<strong className="text-blue-700">「専用Wordテンプレート」</strong>を開き、<br/>
-                    <strong className="bg-yellow-100 px-1">「テキストのみ保持」</strong>で貼り付けてください。
-                  </p>
-                  
-                  {/* 追加：Wordダウンロードボタン（デモ用） */}
-                  <button 
-                    onClick={() => alert('実際の運用では、ここで「絶対にインデントが崩れないように設定されたWordファイル(.docx)」がダウンロードされます。')}
-                    className="flex items-center gap-2 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-lg font-bold transition-colors mb-3 shadow-sm"
-                  >
-                    <FileText className="w-5 h-5" />
-                    専用Wordテンプレをダウンロード
-                  </button>
 
-                  <p className="text-xs text-slate-500">
-                    ※Wordの自動書式（おせっかい機能）が暴走するのを防ぎます
-                  </p>
+                  <div className="flex items-center gap-1 md:gap-3">
+                    <button onClick={() => setIsGuideOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <HelpCircle className="w-5 h-5" />
+                      <span className="hidden md:inline">使い方ガイド</span>
+                    </button>
+                    <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
+                      <Settings className="w-5 h-5" />
+                      <span className="hidden md:inline">設定・デモ</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-wrap gap-1 mt-2">
+                  <button onClick={() => {setActiveTab('layout'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'layout' ? 'bg-blue-600 text-white shadow-inner' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                    <List className="w-4 h-4" /> レイアウト・段落
+                  </button>
+                  <button onClick={() => {setActiveTab('words'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'words' ? 'bg-blue-600 text-white shadow-inner' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                    <Type className="w-4 h-4" /> 用語・表記の統一
+                  </button>
+                  <button onClick={() => {setActiveTab('govForm'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'govForm' ? 'bg-amber-600 text-white shadow-inner' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 border-b-0'}`}>
+                    <FileOutput className="w-4 h-4" /> 役所フォーマット対策
+                  </button>
+                </div>
+              </header>
+
+              <main className="max-w-6xl mx-auto p-4 md:p-8">
+                
+                {activeTab === 'words' && (
+                  <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-6 items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-slate-700">甲を置換:</span>
+                      <input type="text" placeholder="例: 買主" className="border border-slate-300 rounded px-2 py-1 text-sm w-32" value={replaceKou} onChange={e => setReplaceKou(e.target.value)} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-slate-700">乙を置換:</span>
+                      <input type="text" placeholder="例: 売主" className="border border-slate-300 rounded px-2 py-1 text-sm w-32" value={replaceOtsu} onChange={e => setReplaceOtsu(e.target.value)} />
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={fixKanas} onChange={e => setFixKanas(e.target.checked)} className="w-4 h-4 text-blue-600 rounded border-gray-300" />
+                      <span className="text-sm font-bold text-slate-700">接続詞をひらがなに統一</span>
+                    </label>
+                  </div>
+                )}
+
+                {activeTab === 'govForm' && (
+                  <div className="bg-amber-50 p-4 rounded-xl shadow-sm border border-amber-200 mb-6">
+                    <h3 className="font-bold text-amber-900 mb-2 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" /> 指定した文字数で強制的に改行を入れます
+                    </h3>
+                    <p className="text-amber-800 text-xs mb-3">
+                      役所のWordフォーマットで「枠が広がる」「次のページに押し出される」のを防ぐため、指定の文字数でテキストを折り返します。
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-amber-900">1行あたりの最大文字数:</span>
+                      <input type="number" min="10" max="100" className="border border-amber-300 rounded px-3 py-1 text-sm w-20 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono" value={charsPerLine} onChange={e => setCharsPerLine(e.target.value)} />
+                      <span className="text-sm text-amber-900 font-bold">文字</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
+                  
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
+                    <div className="flex justify-between items-center mb-2">
+                      <h2 className="text-sm font-bold text-slate-500">
+                        {activeTab === 'govForm' ? '申請理由などの長文をベタ打ち' : '元のテキスト'}
+                      </h2>
+                    </div>
+                    <textarea className="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed text-sm" placeholder="ここにテキストを貼り付けてください" value={inputText} onChange={(e) => setInputText(e.target.value)} />
+                  </div>
+
+                  <div className="flex justify-center items-center py-4 lg:py-0">
+                    <button onClick={handleProcess} disabled={!inputText.trim()} className={`flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-md transition-all active:scale-95 disabled:bg-slate-300 ${activeTab === 'govForm' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                      <ArrowRight className="text-white w-6 h-6 lg:rotate-0 rotate-90" />
+                    </button>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
+                    <div className="flex justify-between items-center mb-2">
+                      <h2 className="text-sm font-bold text-slate-500">処理結果</h2>
+                      <button onClick={handleCopy} disabled={!outputText} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-bold transition-all ${isCopied ? 'bg-green-100 text-green-700' : activeTab === 'govForm' ? 'bg-amber-700 hover:bg-amber-800 text-white disabled:bg-slate-300' : 'bg-slate-800 hover:bg-slate-700 text-white disabled:bg-slate-300'}`}>
+                        {isCopied ? <><CheckCircle className="w-4 h-4" /> コピー完了</> : <><Copy className="w-4 h-4" /> コピー</>}
+                      </button>
+                    </div>
+                    <div className="flex-1 relative">
+                      <textarea readOnly className={`w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none leading-relaxed text-sm font-mono transition-opacity duration-300 ${isCopied ? 'opacity-30' : 'opacity-100'}`} value={outputText} style={activeTab === 'govForm' ? { wordBreak: 'break-all' } : {}} />
+                      
+                      {!outputText && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
+                          <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
+                          <p className="text-sm text-center">中央のボタンを押して<br/>処理を実行します</p>
+                        </div>
+                      )}
+
+                      {isCopied && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg border-2 border-green-500 p-4 text-center animate-in fade-in zoom-in duration-300 z-10">
+                          <div className="bg-green-100 p-3 rounded-full mb-3 shadow-sm">
+                            <CheckCircle className="w-8 h-8 text-green-600" />
+                          </div>
+                          <h3 className="font-bold text-slate-800 text-lg mb-2">クリップボードにコピーしました</h3>
+                          <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                            以下の<strong className="text-blue-700">「専用Wordテンプレート」</strong>を開き、<br/>
+                            <strong className="bg-yellow-100 px-1">「テキストのみ保持」</strong>で貼り付けてください。
+                          </p>
+                          <button onClick={() => alert('実際の運用では、ここで「絶対にインデントが崩れないように設定されたWordファイル(.docx)」がダウンロードされます。')} className="flex items-center gap-2 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-lg font-bold transition-colors mb-3 shadow-sm">
+                            <FileText className="w-5 h-5" />
+                            専用Wordテンプレをダウンロード
+                          </button>
+                          <p className="text-xs text-slate-500">
+                            ※Wordの自動書式（おせっかい機能）が暴走するのを防ぎます
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </main>
+
+              {/* モーダル：使い方ガイド */}
+              {isGuideOpen && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                      <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                        <HelpCircle className="w-6 h-6 text-blue-600" /> 
+                        使い方ガイド
+                      </h2>
+                      <button onClick={() => setIsGuideOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="p-6 md:p-8 overflow-y-auto">
+                      <section className="mb-8">
+                        <h3 className="text-lg font-bold text-slate-800 border-b-2 border-blue-100 pb-2 mb-4 flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-amber-500"/>
+                          アプリの目的
+                        </h3>
+                        <p className="text-slate-700 leading-relaxed font-medium">
+                          弁護士・士業の皆様が、Wordの煩わしい体裁調整に奪われている時間をゼロにし、<span className="text-blue-700 font-bold bg-blue-50 px-1">本来の専門的な思考・執筆業務に集中できる環境</span>を提供するためのサポートツールです。
+                        </p>
+                      </section>
+                      <section>
+                        <h3 className="text-lg font-bold text-slate-800 border-b-2 border-blue-100 pb-2 mb-4 flex items-center gap-2">
+                          <List className="w-5 h-5 text-blue-500"/>
+                          基本的な使い方
+                        </h3>
+                        <ul className="space-y-6">
+                          <li className="flex items-start gap-4">
+                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">1</span>
+                            <div>
+                              <strong className="block text-slate-800 mb-1">タブの選択</strong>
+                              <p className="text-slate-600 text-sm leading-relaxed">画面上部から、行いたい作業を選びます。</p>
+                            </div>
+                          </li>
+                          <li className="flex items-start gap-4">
+                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">2</span>
+                            <div>
+                              <strong className="block text-slate-800 mb-1">テキストの入力</strong>
+                              <p className="text-slate-600 text-sm leading-relaxed">左側のエリアに、文章をコピーして貼り付けるか、直接入力します。</p>
+                            </div>
+                          </li>
+                          <li className="flex items-start gap-4">
+                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">3</span>
+                            <div>
+                              <strong className="block text-slate-800 mb-1">自動処理の実行</strong>
+                              <p className="text-slate-600 text-sm leading-relaxed">中央の「→」ボタンを押すと、テキストを一瞬で整形します。</p>
+                            </div>
+                          </li>
+                          <li className="flex items-start gap-4">
+                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm mt-0.5">4</span>
+                            <div className="bg-blue-50 p-3 rounded-lg w-full border border-blue-100">
+                              <strong className="block text-blue-900 mb-1">Wordへの貼り付け（重要）</strong>
+                              <p className="text-blue-800 text-sm leading-relaxed">
+                                右側の「コピー」ボタンを押し、Wordで右クリックし、<strong>「テキストのみ保持」</strong>を選んで貼り付けます。
+                              </p>
+                            </div>
+                          </li>
+                        </ul>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* モーダル：設定・デモデータ */}
+              {isSettingsOpen && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+                      <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800">
+                        <Settings className="w-5 h-5 text-slate-600" /> 
+                        設定・デモ操作
+                      </h2>
+                      <button onClick={() => setIsSettingsOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="p-6">
+                      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                        プレゼンテーション用のデモデータを操作します。現在のタブに応じたサンプルテキストが挿入されます。
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        <button onClick={handleLoadDemo} className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-lg transition-colors border border-blue-200">
+                          <FileText className="w-5 h-5" />
+                          デモデータをセット
+                        </button>
+                        <button onClick={handleClearData} className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-50 text-red-700 hover:bg-red-100 font-bold rounded-lg transition-colors border border-red-200">
+                          <Trash2 className="w-5 h-5" />
+                          入力データをクリア
+                        </button>
+                      </div>
+                      <div className={`mt-4 p-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold transition-all duration-300 ${settingsMessage.text ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'} ${settingsMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
+                         <Info className="w-4 h-4" />
+                         {settingsMessage.text || '　'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </main>
+          );
+        }
 
-      {/* ================= モーダル：使い方ガイド ================= */}
-      {isGuideOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
-              <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
-                <HelpCircle className="w-6 h-6 text-blue-600" /> 
-                使い方ガイド
-              </h2>
-              <button onClick={() => setIsGuideOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 md:p-8 overflow-y-auto">
-              
-              <section className="mb-8">
-                <h3 className="text-lg font-bold text-slate-800 border-b-2 border-blue-100 pb-2 mb-4 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-amber-500"/>
-                  アプリの目的
-                </h3>
-                <p className="text-slate-700 leading-relaxed font-medium">
-                  弁護士・士業の皆様が、Wordの煩わしい体裁調整（インデントの崩れ、おせっかいな自動箇条書き、役所指定フォーマットへの入力制限など）に奪われている時間をゼロにし、<span className="text-blue-700 font-bold bg-blue-50 px-1">本来の専門的な思考・執筆業務に集中できる環境</span>を提供するためのサポートツールです。
-                </p>
-              </section>
-
-              <section>
-                <h3 className="text-lg font-bold text-slate-800 border-b-2 border-blue-100 pb-2 mb-4 flex items-center gap-2">
-                  <List className="w-5 h-5 text-blue-500"/>
-                  基本的な使い方
-                </h3>
-                <ul className="space-y-6">
-                  <li className="flex items-start gap-4">
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">1</span>
-                    <div>
-                      <strong className="block text-slate-800 mb-1">タブの選択</strong>
-                      <p className="text-slate-600 text-sm leading-relaxed">画面上部から、行いたい作業（レイアウト・段落 / 用語・表記の統一 / 役所フォーマット対策）を選びます。</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">2</span>
-                    <div>
-                      <strong className="block text-slate-800 mb-1">テキストの入力</strong>
-                      <p className="text-slate-600 text-sm leading-relaxed">左側の「元のテキスト」エリアに、WordやPDFから文章をコピーして貼り付けるか、直接入力します。</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">3</span>
-                    <div>
-                      <strong className="block text-slate-800 mb-1">自動処理の実行</strong>
-                      <p className="text-slate-600 text-sm leading-relaxed">中央の「→（変換）」ボタンを押すと、アプリが指定のルールに従ってテキストを一瞬で整形します。</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm mt-0.5">4</span>
-                    <div className="bg-blue-50 p-3 rounded-lg w-full border border-blue-100">
-                      <strong className="block text-blue-900 mb-1">Wordへの貼り付け（重要）</strong>
-                      <p className="text-blue-800 text-sm leading-relaxed">
-                        右側の「コピー」ボタンを押し、Wordの対象箇所にて右クリックし、<strong>「テキストのみ保持」</strong>を選んで貼り付けます。これによりWordの自動書式を暴走させず、綺麗なレイアウトが実現します。
-                      </p>
-                    </div>
-                  </li>
-                </ul>
-              </section>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= モーダル：設定・デモデータ ================= */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
-              <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800">
-                <Settings className="w-5 h-5 text-slate-600" /> 
-                設定・デモ操作
-              </h2>
-              <button onClick={() => setIsSettingsOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-                プレゼンテーション用のデモデータを操作します。現在のタブ（{activeTab === 'layout' ? 'レイアウト' : activeTab === 'words' ? '用語統一' : '役所フォーマット'}）に応じたサンプルテキストが挿入されます。
-              </p>
-              
-              <div className="flex flex-col gap-3">
-                <button 
-                  onClick={handleLoadDemo} 
-                  className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-lg transition-colors border border-blue-200"
-                >
-                  <FileText className="w-5 h-5" />
-                  デモデータをセット
-                </button>
-                <button 
-                  onClick={handleClearData} 
-                  className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-50 text-red-700 hover:bg-red-100 font-bold rounded-lg transition-colors border border-red-200"
-                >
-                  <Trash2 className="w-5 h-5" />
-                  入力データをクリア
-                </button>
-              </div>
-
-              {/* 確認メッセージ */}
-              <div className={`mt-4 p-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold transition-all duration-300 ${settingsMessage.text ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'} ${settingsMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
-                 <Info className="w-4 h-4" />
-                 {settingsMessage.text || '　'}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        // アプリの起動
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
