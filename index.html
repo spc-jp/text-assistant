@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>法務テキスト整形・統一アシスタント</title>
+    <link rel="icon" type="image/png" href="https://spc-jp.github.io/text-assistant/favicon.png">
     
     <!-- スタイル（Tailwind CSS）とReact本体を読み込む -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -545,11 +546,36 @@ TEL：○○○-○○○○-○○○○
 
           const insertSample = () => {
             if (activeTab === 'layout') {
-              setInputText(`第1条（目的）\n甲は乙に対し業務を委託する。\n2 乙は善良なる管理者として遂行する。`);
+              setInputText(`第1条（目的）
+本契約は、委託者○○株式会社（以下「甲」という。）と受託者○○株式会社（以下「乙」という。）との間で、甲が乙に委託するシステム開発業務に関する基本的事項を定めることを目的とする。
+第2条（委託業務の範囲）
+甲が乙に委託する業務の範囲は、別紙「業務仕様書」に定める通りとする。
+2 乙は、善良なる管理者の注意をもって本業務を遂行しなければならない。
+3 乙は、本業務の遂行にあたり、甲の事前の書面による承諾なく、第三者に再委託してはならない。
+第3条（委託料及び支払方法）
+甲は乙に対し、本業務の対価として月額金30万円（消費税別）を支払うものとする。
+2 支払は毎月末日締め、翌月25日限り、乙の指定する銀行口座への振込による。振込手数料は甲の負担とする。
+第4条（秘密保持）
+甲及び乙は、本契約の履行に際して知り得た相手方の技術上・営業上その他一切の情報を第三者に漏洩し、または本契約の履行以外の目的に使用してはならない。
+2 前項の義務は、本契約終了後も3年間存続するものとする。
+第5条（契約期間）
+本契約の有効期間は、令和○年○月○日から令和○年○月○日までとする。ただし、期間満了の1か月前までに甲乙いずれかから書面による解約の申し出がない場合は、同一条件でさらに1年間自動更新するものとし、以後も同様とする。
+第6条（契約解除）
+甲または乙は、相手方が本契約の条項に違反し、相当期間を定めて催告したにもかかわらず是正されない場合、本契約を解除することができる。
+2 甲または乙は、相手方が破産、民事再生、会社更生等の手続の申立てを受けまたは自ら申し立てた場合、何らの通知・催告を要せず直ちに本契約を解除することができる。
+第7条（損害賠償）
+甲または乙は、本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。ただし、賠償額は本契約に基づき甲が乙に支払った直近3か月分の委託料の合計額を上限とする。
+第8条（合意管轄）
+本契約に関する紛争については、東京地方裁判所を第一審の専属的合意管轄裁判所とする。`);
             } else if (activeTab === 'words') {
-              setInputText(`甲及び乙は、本契約を締結する。\n但し、甲又は乙のいずれかが解除を申し出た場合はこの限りではない。`);
+              setInputText(`甲及び乙は、本契約の目的を達成するため、相互に誠実に協力する義務を負う。
+甲又は乙のいずれかが本契約の条項に違反した場合、他方当事者は書面により催告した上で本契約を解除することができる。但し、相手方が破産手続の開始決定を受けた場合は、催告を要せず直ちに解除できる。
+甲及び乙は、本契約の締結並びに履行に関して知り得た相手方の秘密情報を、第三者に漏洩し若しくは開示し、又は本契約の目的以外に使用してはならない。
+前項の義務は、本契約終了後においても3年間存続するものとする。
+本契約に定めのない事項又は本契約の解釈に疑義が生じた場合は、甲及び乙が誠実に協議の上、解決するものとする。
+甲は本業務を遂行するにあたり、従って定められた手順に従わなければならない。但し、乙の事前承認を得た場合はこの限りではない。`);
             } else if (activeTab === 'govForm') {
-              setInputText(`本件について申請者は、令和〇年〇月〇日に発生した事象に関して、関係各所との調整を重ねた結果、別紙の通り事業計画を変更する必要があると判断いたしました。つきましては、変更後の計画に基づき、速やかに必要な手続きを進める所存であります。`);
+              setInputText(`本件補助金の交付申請にあたり、申請者である当社は令和○年○月○日に事業計画を策定し、同年○月○日に関係機関との事前協議を経た上で、本申請書を提出するものであります。当社は○○県○○市において○○事業を営む中小企業であり、今般の設備投資により生産効率を30％向上させるとともに、新規雇用を5名創出することを計画しております。当該設備の導入により、製品の品質向上および納期短縮が見込まれ、既存取引先への安定供給はもとより、新規顧客の開拓にも資するものと確信しております。なお、本補助事業の実施にあたっては、関係法令を遵守し、適正な経理処理を行うとともに、事業完了後においても補助金の交付目的に沿った事業運営を継続することをここに誓約いたします。つきましては、別添の事業計画書および見積書をご査収いただき、何卒補助金の交付につきましてご承認賜りますよう、よろしくお願い申し上げます。`);
             }
           };
 
@@ -570,12 +596,12 @@ TEL：○○○-○○○○-○○○○
             <div className="min-h-screen relative">
               <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
                 <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <button onClick={() => { setActiveTab('template'); setOutputText(''); setSelectedTemplate(null); }} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
                       <FileText className="text-white w-6 h-6" />
                     </div>
                     <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">リーガルテキスト・アシスタント</h1>
-                  </div>
+                  </button>
 
                   <div className="flex items-center gap-1 md:gap-3">
                     <button onClick={() => setIsGuideOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
@@ -784,31 +810,69 @@ TEL：○○○-○○○○-○○○○
                           弁護士・士業の皆様が、Wordの煩わしい体裁調整に奪われている時間をゼロにし、<span className="text-blue-700 font-bold bg-blue-50 px-1">本来の専門的な思考・執筆業務に集中できる環境</span>を提供するためのサポートツールです。
                         </p>
                       </section>
+
+                      <section className="mb-8">
+                        <h3 className="text-lg font-bold text-slate-800 border-b-2 border-emerald-100 pb-2 mb-4 flex items-center gap-2">
+                          <BookOpen className="w-5 h-5 text-emerald-500"/>
+                          各タブの機能
+                        </h3>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                            <BookOpen className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"/>
+                            <div>
+                              <strong className="block text-emerald-900 text-sm mb-0.5">テンプレート選択</strong>
+                              <p className="text-emerald-800 text-xs leading-relaxed">契約書・士業書式・申請書など9種類のひな形から選んで読み込めます。読み込んだ後は「レイアウト整形」タブで仕上げます。</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <List className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"/>
+                            <div>
+                              <strong className="block text-blue-900 text-sm mb-0.5">レイアウト・段落</strong>
+                              <p className="text-blue-800 text-xs leading-relaxed">第○条・第○項・①②③などの階層を自動認識し、全角スペースで正確にインデントを揃えます。</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <Type className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"/>
+                            <div>
+                              <strong className="block text-blue-900 text-sm mb-0.5">用語・表記の統一</strong>
+                              <p className="text-blue-800 text-xs leading-relaxed">「甲」「乙」を当事者名に一括置換。「及び→および」「但し→ただし」など接続詞をひらがなに統一します。</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <FileOutput className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"/>
+                            <div>
+                              <strong className="block text-amber-900 text-sm mb-0.5">役所フォーマット対策</strong>
+                              <p className="text-amber-800 text-xs leading-relaxed">役所のWordフォームで枠が広がったり次ページにはみ出すのを防ぐため、指定文字数で強制改行します。</p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
                       <section>
                         <h3 className="text-lg font-bold text-slate-800 border-b-2 border-blue-100 pb-2 mb-4 flex items-center gap-2">
                           <List className="w-5 h-5 text-blue-500"/>
                           基本的な使い方
                         </h3>
-                        <ul className="space-y-6">
+                        <ul className="space-y-5">
                           <li className="flex items-start gap-4">
-                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">1</span>
+                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm mt-0.5">1</span>
                             <div>
-                              <strong className="block text-slate-800 mb-1">タブの選択</strong>
-                              <p className="text-slate-600 text-sm leading-relaxed">画面上部から、行いたい作業を選びます。</p>
+                              <strong className="block text-slate-800 mb-1">テンプレートを選ぶ（任意）</strong>
+                              <p className="text-slate-600 text-sm leading-relaxed">「テンプレート選択」タブでひな形を選び「このテンプレートを使う」を押すと、レイアウト整形タブにテキストが読み込まれます。既存の文書を整形する場合はこの手順は不要です。</p>
                             </div>
                           </li>
                           <li className="flex items-start gap-4">
                             <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">2</span>
                             <div>
-                              <strong className="block text-slate-800 mb-1">テキストの入力</strong>
-                              <p className="text-slate-600 text-sm leading-relaxed">左側のエリアに、文章をコピーして貼り付けるか、直接入力します。</p>
+                              <strong className="block text-slate-800 mb-1">テキストを貼り付ける</strong>
+                              <p className="text-slate-600 text-sm leading-relaxed">整形したいテキストを左側のエリアに貼り付けるか、直接入力します。</p>
                             </div>
                           </li>
                           <li className="flex items-start gap-4">
                             <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">3</span>
                             <div>
-                              <strong className="block text-slate-800 mb-1">自動処理の実行</strong>
-                              <p className="text-slate-600 text-sm leading-relaxed">中央の「→」ボタンを押すと、テキストを一瞬で整形します。</p>
+                              <strong className="block text-slate-800 mb-1">「→」ボタンで処理を実行する</strong>
+                              <p className="text-slate-600 text-sm leading-relaxed">中央のボタンを押すと、テキストが一瞬で整形されて右側に表示されます。</p>
                             </div>
                           </li>
                           <li className="flex items-start gap-4">
@@ -816,7 +880,7 @@ TEL：○○○-○○○○-○○○○
                             <div className="bg-blue-50 p-3 rounded-lg w-full border border-blue-100">
                               <strong className="block text-blue-900 mb-1">Wordへの貼り付け（重要）</strong>
                               <p className="text-blue-800 text-sm leading-relaxed">
-                                右側の「コピー」ボタンを押し、Wordで右クリックし、<strong>「テキストのみ保持」</strong>を選んで貼り付けます。
+                                右側の「コピー」ボタンを押し、Wordで右クリックして<strong>「テキストのみ保持」</strong>を選んで貼り付けます。通常の貼り付けではWordの自動書式が崩れる原因になります。
                               </p>
                             </div>
                           </li>
