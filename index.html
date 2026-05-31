@@ -41,10 +41,386 @@
         const Info = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></Icon>;
         const Trash2 = ({className}) => <Icon className={className}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
         const Zap = ({className}) => <Icon className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></Icon>;
+        const BookOpen = ({className}) => <Icon className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
+        const ChevronDown = ({className}) => <Icon className={className}><path d="m6 9 6 6 6-6"/></Icon>;
+        const ChevronUp = ({className}) => <Icon className={className}><path d="m18 15-6-6-6 6"/></Icon>;
+
+        // --- テンプレートデータ ---
+        const TEMPLATES = [
+          {
+            category: '契約書類',
+            color: 'blue',
+            items: [
+              {
+                name: '業務委託契約書',
+                desc: '業務の委託・受託関係を定める基本契約',
+                text: `業務委託契約書
+
+委託者 ○○株式会社（以下「甲」という。）と受託者 ○○株式会社（以下「乙」という。）は、以下の通り業務委託契約（以下「本契約」という。）を締結する。
+
+第1条（目的）
+甲は乙に対し、下記の業務（以下「本業務」という。）を委託し、乙はこれを受託する。
+
+第2条（委託業務の内容）
+本業務の内容は、別紙「業務内容仕様書」に定める通りとする。
+
+第3条（委託料）
+1 甲は乙に対し、本業務の対価として、月額金○○円（税別）を支払うものとする。
+2 支払方法は、毎月末日締め翌月末日払いとする。
+
+第4条（再委託の禁止）
+乙は、甲の書面による事前の承諾なく、本業務の全部または一部を第三者に再委託してはならない。
+
+第5条（秘密保持）
+1 甲及び乙は、本契約の履行に際して知り得た相手方の業務上・技術上の情報を第三者に漏洩し、または本契約の履行以外の目的に使用してはならない。
+2 前項の義務は、本契約終了後も2年間存続する。
+
+第6条（契約期間）
+本契約の有効期間は、契約締結日から1年間とする。ただし、期間満了の1ヶ月前までに甲乙いずれかから書面による解約の申し出がない場合は、同一条件で1年間自動更新するものとし、以後も同様とする。
+
+第7条（契約解除）
+1 甲または乙は、相手方が本契約の条項に違反し、相当期間を定めて催告したにもかかわらず是正されない場合、本契約を解除することができる。
+2 甲または乙は、相手方が破産、民事再生、会社更生等の手続の申立てを受けまたは自ら申し立てた場合、何らの通知・催告を要せず本契約を解除することができる。
+
+第8条（損害賠償）
+甲または乙は、本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。
+
+第9条（協議事項）
+本契約に定めのない事項または疑義が生じた場合は、甲乙協議の上、誠実に解決を図るものとする。
+
+第10条（合意管轄）
+本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。
+
+以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。
+
+令和　　年　　月　　日
+
+甲　住所：
+　　氏名：　　　　　　　　　　　　㊞
+
+乙　住所：
+　　氏名：　　　　　　　　　　　　㊞`
+              },
+              {
+                name: '秘密保持契約書（NDA）',
+                desc: '情報の非開示・秘密保持を約束する契約',
+                text: `秘密保持契約書
+
+○○株式会社（以下「甲」という。）と○○株式会社（以下「乙」という。）は、両社間の業務提携の検討（以下「本件目的」という。）のために必要な情報の開示に関し、以下の通り秘密保持契約（以下「本契約」という。）を締結する。
+
+第1条（秘密情報の定義）
+1 「秘密情報」とは、甲乙が本件目的のために相手方に開示する技術上、営業上その他一切の情報であって、開示に際して秘密である旨を明示したものをいう。
+2 次の各号のいずれかに該当する情報は秘密情報から除外する。
+①開示を受けた時点ですでに公知であった情報
+②開示を受けた後、受領者の責に帰すべき事由によらず公知となった情報
+③開示を受けた時点ですでに受領者が保有していた情報
+④受領者が第三者から秘密保持義務を負わずに取得した情報
+
+第2条（秘密保持義務）
+甲及び乙は、相手方から開示された秘密情報を善良な管理者の注意をもって管理し、本件目的以外に使用せず、また第三者に開示もしくは漏洩してはならない。
+
+第3条（複製の制限）
+甲及び乙は、相手方の書面による事前の承諾なく、秘密情報を複製してはならない。
+
+第4条（契約期間）
+本契約の有効期間は契約締結日から1年間とし、秘密保持義務は本契約終了後2年間存続する。
+
+第5条（秘密情報の返還）
+甲及び乙は、相手方から要求があった場合または本契約が終了した場合、相手方の秘密情報及びその複製物を速やかに返還または廃棄しなければならない。
+
+第6条（損害賠償）
+甲または乙が本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。
+
+第7条（合意管轄）
+本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。
+
+以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。
+
+令和　　年　　月　　日
+
+甲　住所：
+　　氏名：　　　　　　　　　　　　㊞
+
+乙　住所：
+　　氏名：　　　　　　　　　　　　㊞`
+              },
+              {
+                name: '金銭消費貸借契約書',
+                desc: '金銭の貸し借りを定める契約書',
+                text: `金銭消費貸借契約書
+
+貸主 ○○（以下「甲」という。）と借主 ○○（以下「乙」という。）は、以下の通り金銭消費貸借契約を締結する。
+
+第1条（貸付）
+甲は乙に対し、以下の条件にて金銭を貸し付け、乙はこれを借り受けた。
+①貸付金額：金○○○万円
+②貸付日：令和　　年　　月　　日
+③利息：年　　％（元利均等返済）
+④返済期限：令和　　年　　月　　日
+
+第2条（返済方法）
+乙は甲に対し、毎月　　日限り、金○○○円を甲の指定する銀行口座に振り込む方法により返済する。振込手数料は乙の負担とする。
+
+第3条（期限の利益の喪失）
+乙が次の各号のいずれかに該当した場合、乙は甲から通知・催告を受けることなく、当然に期限の利益を失い、残債務の全額を直ちに弁済しなければならない。
+①返済を1回でも怠ったとき
+②住所・連絡先の変更を届け出ずに所在が不明となったとき
+③破産・民事再生等の申立てを受けまたは自ら申し立てたとき
+
+第4条（遅延損害金）
+乙が返済を遅延した場合、乙は遅延した元本に対し、年　　％の割合による遅延損害金を甲に支払わなければならない。
+
+第5条（合意管轄）
+本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。
+
+以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。
+
+令和　　年　　月　　日
+
+甲　住所：
+　　氏名：　　　　　　　　　　　　㊞
+
+乙　住所：
+　　氏名：　　　　　　　　　　　　㊞`
+              },
+            ]
+          },
+          {
+            category: '士業書式',
+            color: 'purple',
+            items: [
+              {
+                name: '内容証明通知書（請求書）',
+                desc: '支払請求・督促のための内容証明用書式',
+                text: `通　知　書
+
+○○株式会社
+代表取締役 ○○ ○○ 殿
+
+令和　　年　　月　　日
+
+通知人　　○○ ○○
+代理人弁護士　○○法律事務所
+弁護士　○○ ○○
+〒○○○-○○○○
+○○県○○市○○町○－○－○
+TEL：○○○-○○○○-○○○○
+
+拝啓
+
+私は、○○ ○○（以下「依頼者」といいます。）の代理人として、以下の通り通知します。
+
+第1　請求の趣旨
+貴社は依頼者に対し、令和　　年　　月　　日付け○○契約（以下「本契約」といいます。）に基づく代金金○○○万円及びこれに対する支払期日である令和　　年　　月　　日から完済まで年　　％の割合による遅延損害金を支払う義務があります。
+
+第2　請求の理由
+依頼者と貴社は、令和　　年　　月　　日、○○を目的とする本契約を締結しました。依頼者は本契約上の義務を全て履行しましたが、貴社は支払期日を過ぎた現在においても、上記代金を支払っておりません。
+
+第3　請求
+ついては、本通知到達後7日以内に、上記金員を下記口座にお振り込みください。
+
+記
+金融機関：○○銀行○○支店
+口座種別：普通預金
+口座番号：○○○○○○○
+口座名義：○○ ○○
+
+期日までにお支払いいただけない場合は、法的措置を取ることもやむを得ないことをあらかじめご承知おきください。
+
+敬具`
+              },
+              {
+                name: '陳述書（民事訴訟用）',
+                desc: '民事訴訟・調停における陳述書の基本書式',
+                text: `陳　述　書
+
+令和　　年　　月　　日
+
+○○地方裁判所　御中
+
+陳述者　　○○ ○○　㊞
+
+私は、○○事件（令和　　年（○）第○○○○号）について、以下の通り陳述します。
+
+第1　当事者について
+1 私（以下「申立人」といいます。）は、○○在住の○○業を営む者です。
+2 相手方○○（以下「相手方」といいます。）とは、令和　　年頃から○○を通じて知り合いました。
+
+第2　経緯について
+1 令和　　年　　月　　日、私と相手方は○○について話し合いを行いました。
+2 その際、相手方は「○○する」旨を約束しました（甲第○号証）。
+3 しかし、相手方はその後、上記約束を履行しませんでした。
+
+第3　損害について
+1 相手方の上記行為により、私は以下の損害を被りました。
+①○○　　　金○○○万円
+②○○　　　金○○○万円
+2 合計損害額は金○○○万円です。
+
+第4　まとめ
+以上の通り、相手方には○○の義務があります。裁判所におかれましては、申立人の請求を認容する判断をいただけますよう、お願い申し上げます。
+
+以上`
+              },
+              {
+                name: '遺産分割協議書',
+                desc: '相続人間の遺産分割を定める協議書',
+                text: `遺産分割協議書
+
+被相続人　○○ ○○（令和　　年　　月　　日死亡）の遺産について、共同相続人全員による遺産分割の協議を行った結果、以下の通り合意した。
+
+第1条（相続財産の確認）
+被相続人の遺産は、別紙「相続財産目録」記載の通りである。
+
+第2条（相続人○○が取得する財産）
+次の財産は、相続人○○ ○○（以下「甲」という。）が取得する。
+①不動産
+　所在：○○市○○町○番地
+　地番：○番○
+　地目：宅地
+　地積：○○.○○㎡
+　（登記簿上の表示）
+
+第3条（相続人○○が取得する財産）
+次の財産は、相続人○○ ○○（以下「乙」という。）が取得する。
+①預貯金
+　○○銀行○○支店　普通預金　口座番号○○○○○○○
+　残高　金○○○万円
+
+第4条（相続債務の負担）
+被相続人の相続債務については、甲及び乙が法定相続分に従い負担する。
+
+第5条（その他の財産）
+本協議書に記載のない遺産（後日判明したものを含む。）については、甲乙協議の上、決定する。
+
+以上の通り遺産分割協議が成立したので、本書を○通作成し、各自1通を保有する。
+
+令和　　年　　月　　日
+
+相続人（甲）住所：
+　　　　　　氏名：　　　　　　　　　　　　㊞
+
+相続人（乙）住所：
+　　　　　　氏名：　　　　　　　　　　　　㊞`
+              },
+            ]
+          },
+          {
+            category: '申請・届出書類',
+            color: 'green',
+            items: [
+              {
+                name: '示談書（交通事故）',
+                desc: '交通事故の示談・解決を定める書面',
+                text: `示　談　書
+
+加害者 ○○ ○○（以下「甲」という。）と被害者 ○○ ○○（以下「乙」という。）は、令和　　年　　月　　日に○○において発生した交通事故（以下「本件事故」という。）について、以下の通り示談が成立した。
+
+第1条（損害賠償額）
+甲は乙に対し、本件事故による損害賠償として、金○○○万円を支払うことを認める。
+
+第2条（支払方法）
+甲は乙に対し、前条の金員を令和　　年　　月　　日限り、乙の指定する下記銀行口座に振り込む方法にて支払う。
+金融機関：○○銀行○○支店
+口座種別：普通預金
+口座番号：○○○○○○○
+口座名義：○○ ○○
+
+第3条（清算条項）
+乙は、本示談書に定める以外には、本件事故に関して甲及び甲の加入する保険会社に対し、将来いかなる名目であっても金銭その他の請求を行わないことを確認する。
+
+第4条（宥恕条項）
+乙は、本示談の成立をもって甲を宥恕する。
+
+以上の通り示談が成立したので、本書2通を作成し、甲乙各1通を保有する。
+
+令和　　年　　月　　日
+
+甲　住所：
+　　氏名：　　　　　　　　　　　　㊞
+
+乙　住所：
+　　氏名：　　　　　　　　　　　　㊞`
+              },
+              {
+                name: '解雇通知書',
+                desc: '労働者への解雇を通知する書面',
+                text: `解　雇　通　知　書
+
+○○ ○○ 殿
+
+令和　　年　　月　　日
+
+○○株式会社
+代表取締役　○○ ○○
+
+拝啓
+
+貴殿は、令和　　年　　月　　日付けにて、当社を解雇することをここに通知します。
+
+解雇理由は以下の通りです。
+
+記
+
+1 解雇理由
+①○○（就業規則第○条第○号に該当）
+②○○
+
+2 解雇予告手当
+労働基準法第20条に基づき、本通知日より30日に不足する　　日分の平均賃金相当額（金○○○円）を解雇予告手当として支払います。
+
+3 退職手続き
+令和　　年　　月　　日までに、以下の書類・物品を返却してください。
+①会社貸与品（社員証・制服・鍵など）
+②業務上の書類・データ
+
+なお、本件について不服がある場合は、労働局・労働審判等の手続きを利用することができます。
+
+敬具`
+              },
+              {
+                name: '合意書（一般用）',
+                desc: '当事者間の合意・約束を確認する書面',
+                text: `合　意　書
+
+○○ ○○（以下「甲」という。）と○○ ○○（以下「乙」という。）は、以下の通り合意した。
+
+第1条（合意の目的）
+甲及び乙は、○○に関して以下の通り合意する。
+
+第2条（甲の義務）
+甲は乙に対し、以下のことを行う。
+①○○
+②○○
+
+第3条（乙の義務）
+乙は甲に対し、以下のことを行う。
+①○○
+②○○
+
+第4条（有効期間）
+本合意書の有効期間は、令和　　年　　月　　日から令和　　年　　月　　日までとする。
+
+第5条（誠実協議）
+本合意書に定めのない事項または本合意書の解釈に疑義が生じた場合は、甲乙誠実に協議して解決するものとする。
+
+以上の通り合意したので、本書2通を作成し、甲乙各1通を保有する。
+
+令和　　年　　月　　日
+
+甲　住所：
+　　氏名：　　　　　　　　　　　　㊞
+
+乙　住所：
+　　氏名：　　　　　　　　　　　　㊞`
+              },
+            ]
+          },
+        ];
 
         // --- メインアプリ ---
         function App() {
-          const [activeTab, setActiveTab] = useState('layout');
+          const [activeTab, setActiveTab] = useState('template');
           const [inputText, setInputText] = useState('');
           const [outputText, setOutputText] = useState('');
           const [isCopied, setIsCopied] = useState(false);
@@ -61,6 +437,29 @@
 
           // タブ3用の設定状態
           const [charsPerLine, setCharsPerLine] = useState(35);
+
+          // テンプレートタブ用の状態
+          const [openCategory, setOpenCategory] = useState('契約書類');
+          const [selectedTemplate, setSelectedTemplate] = useState(null);
+          const [templateLoaded, setTemplateLoaded] = useState(false);
+
+          const colorMap = {
+            blue:   { badge: 'bg-blue-100 text-blue-700', header: 'bg-blue-50 border-blue-200 text-blue-800', card: 'hover:border-blue-300 hover:bg-blue-50', btn: 'bg-blue-600 hover:bg-blue-700' },
+            purple: { badge: 'bg-purple-100 text-purple-700', header: 'bg-purple-50 border-purple-200 text-purple-800', card: 'hover:border-purple-300 hover:bg-purple-50', btn: 'bg-purple-600 hover:bg-purple-700' },
+            green:  { badge: 'bg-green-100 text-green-700', header: 'bg-green-50 border-green-200 text-green-800', card: 'hover:border-green-300 hover:bg-green-50', btn: 'bg-green-600 hover:bg-green-700' },
+          };
+
+          const handleLoadTemplate = (template) => {
+            setSelectedTemplate(template);
+            setTemplateLoaded(false);
+          };
+
+          const handleUseTemplate = () => {
+            setInputText(selectedTemplate.text);
+            setOutputText('');
+            setTemplateLoaded(true);
+            setActiveTab('layout');
+          };
 
           const formatLayout = (text) => {
             const lines = text.split('\n');
@@ -191,6 +590,9 @@
                 </div>
                 
                 <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-wrap gap-1 mt-2">
+                  <button onClick={() => {setActiveTab('template'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'template' ? 'bg-emerald-600 text-white shadow-inner' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 border-b-0'}`}>
+                    <BookOpen className="w-4 h-4" /> テンプレート選択
+                  </button>
                   <button onClick={() => {setActiveTab('layout'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'layout' ? 'bg-blue-600 text-white shadow-inner' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                     <List className="w-4 h-4" /> レイアウト・段落
                   </button>
@@ -204,7 +606,68 @@
               </header>
 
               <main className="max-w-6xl mx-auto p-4 md:p-8">
-                
+
+                {activeTab === 'template' && (
+                  <div>
+                    <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                      <p className="text-emerald-800 text-sm font-bold flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        テンプレートを選択し、「このテンプレートを使う」ボタンを押すと、レイアウト整形タブにテキストが読み込まれます。
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
+                      {/* カテゴリ一覧 */}
+                      <div className="flex flex-col gap-2">
+                        {TEMPLATES.map(cat => {
+                          const c = colorMap[cat.color];
+                          return (
+                            <button key={cat.category} onClick={() => { setOpenCategory(cat.category); setSelectedTemplate(null); }}
+                              className={`flex items-center justify-between px-4 py-3 rounded-xl border font-bold text-sm transition-all ${openCategory === cat.category ? c.header + ' border shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                              <span>{cat.category}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${c.badge}`}>{cat.items.length}件</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* テンプレート一覧＋プレビュー */}
+                      <div className="flex flex-col gap-4">
+                        {TEMPLATES.filter(cat => cat.category === openCategory).map(cat => {
+                          const c = colorMap[cat.color];
+                          return (
+                            <div key={cat.category}>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                                {cat.items.map(tmpl => (
+                                  <button key={tmpl.name} onClick={() => handleLoadTemplate(tmpl)}
+                                    className={`text-left p-4 bg-white border-2 rounded-xl transition-all ${selectedTemplate?.name === tmpl.name ? 'border-emerald-500 bg-emerald-50 shadow-md' : 'border-slate-200 ' + c.card}`}>
+                                    <p className="font-bold text-slate-800 text-sm mb-1">{tmpl.name}</p>
+                                    <p className="text-xs text-slate-500 leading-relaxed">{tmpl.desc}</p>
+                                  </button>
+                                ))}
+                              </div>
+
+                              {selectedTemplate && (
+                                <div className="bg-white border-2 border-emerald-300 rounded-xl overflow-hidden shadow-sm">
+                                  <div className="flex items-center justify-between px-5 py-3 bg-emerald-50 border-b border-emerald-200">
+                                    <h3 className="font-bold text-emerald-900 text-sm">{selectedTemplate.name} — プレビュー</h3>
+                                    <button onClick={handleUseTemplate}
+                                      className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors shadow-sm">
+                                      <ArrowRight className="w-4 h-4" />
+                                      このテンプレートを使う
+                                    </button>
+                                  </div>
+                                  <pre className="p-5 text-xs text-slate-700 leading-relaxed whitespace-pre-wrap font-sans overflow-y-auto max-h-96">{selectedTemplate.text}</pre>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {activeTab === 'words' && (
                   <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-6 items-center">
                     <div className="flex items-center gap-2">
@@ -238,62 +701,64 @@
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
-                  
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
-                    <div className="flex justify-between items-center mb-2">
-                      <h2 className="text-sm font-bold text-slate-500">
-                        {activeTab === 'govForm' ? '申請理由などの長文をベタ打ち' : '元のテキスト'}
-                      </h2>
+                {activeTab !== 'template' && (
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
+
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
+                      <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-sm font-bold text-slate-500">
+                          {activeTab === 'govForm' ? '申請理由などの長文をベタ打ち' : '元のテキスト'}
+                        </h2>
+                      </div>
+                      <textarea className="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed text-sm" placeholder="ここにテキストを貼り付けてください" value={inputText} onChange={(e) => setInputText(e.target.value)} />
                     </div>
-                    <textarea className="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed text-sm" placeholder="ここにテキストを貼り付けてください" value={inputText} onChange={(e) => setInputText(e.target.value)} />
-                  </div>
 
-                  <div className="flex justify-center items-center py-4 lg:py-0">
-                    <button onClick={handleProcess} disabled={!inputText.trim()} className={`flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-md transition-all active:scale-95 disabled:bg-slate-300 ${activeTab === 'govForm' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
-                      <ArrowRight className="text-white w-6 h-6 lg:rotate-0 rotate-90" />
-                    </button>
-                  </div>
-
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
-                    <div className="flex justify-between items-center mb-2">
-                      <h2 className="text-sm font-bold text-slate-500">処理結果</h2>
-                      <button onClick={handleCopy} disabled={!outputText} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-bold transition-all ${isCopied ? 'bg-green-100 text-green-700' : activeTab === 'govForm' ? 'bg-amber-700 hover:bg-amber-800 text-white disabled:bg-slate-300' : 'bg-slate-800 hover:bg-slate-700 text-white disabled:bg-slate-300'}`}>
-                        {isCopied ? <><CheckCircle className="w-4 h-4" /> コピー完了</> : <><Copy className="w-4 h-4" /> コピー</>}
+                    <div className="flex justify-center items-center py-4 lg:py-0">
+                      <button onClick={handleProcess} disabled={!inputText.trim()} className={`flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-md transition-all active:scale-95 disabled:bg-slate-300 ${activeTab === 'govForm' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                        <ArrowRight className="text-white w-6 h-6 lg:rotate-0 rotate-90" />
                       </button>
                     </div>
-                    <div className="flex-1 relative">
-                      <textarea readOnly className={`w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none leading-relaxed text-sm font-mono transition-opacity duration-300 ${isCopied ? 'opacity-30' : 'opacity-100'}`} value={outputText} style={activeTab === 'govForm' ? { wordBreak: 'break-all' } : {}} />
-                      
-                      {!outputText && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
-                          <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                          <p className="text-sm text-center">中央のボタンを押して<br/>処理を実行します</p>
-                        </div>
-                      )}
 
-                      {isCopied && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg border-2 border-green-500 p-4 text-center animate-in fade-in zoom-in duration-300 z-10">
-                          <div className="bg-green-100 p-3 rounded-full mb-3 shadow-sm">
-                            <CheckCircle className="w-8 h-8 text-green-600" />
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
+                      <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-sm font-bold text-slate-500">処理結果</h2>
+                        <button onClick={handleCopy} disabled={!outputText} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-bold transition-all ${isCopied ? 'bg-green-100 text-green-700' : activeTab === 'govForm' ? 'bg-amber-700 hover:bg-amber-800 text-white disabled:bg-slate-300' : 'bg-slate-800 hover:bg-slate-700 text-white disabled:bg-slate-300'}`}>
+                          {isCopied ? <><CheckCircle className="w-4 h-4" /> コピー完了</> : <><Copy className="w-4 h-4" /> コピー</>}
+                        </button>
+                      </div>
+                      <div className="flex-1 relative">
+                        <textarea readOnly className={`w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none leading-relaxed text-sm font-mono transition-opacity duration-300 ${isCopied ? 'opacity-30' : 'opacity-100'}`} value={outputText} style={activeTab === 'govForm' ? { wordBreak: 'break-all' } : {}} />
+
+                        {!outputText && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
+                            <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
+                            <p className="text-sm text-center">中央のボタンを押して<br/>処理を実行します</p>
                           </div>
-                          <h3 className="font-bold text-slate-800 text-lg mb-2">クリップボードにコピーしました</h3>
-                          <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                            以下の<strong className="text-blue-700">「専用Wordテンプレート」</strong>を開き、<br/>
-                            <strong className="bg-yellow-100 px-1">「テキストのみ保持」</strong>で貼り付けてください。
-                          </p>
-                          <button onClick={() => alert('実際の運用では、ここで「絶対にインデントが崩れないように設定されたWordファイル(.docx)」がダウンロードされます。')} className="flex items-center gap-2 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-lg font-bold transition-colors mb-3 shadow-sm">
-                            <FileText className="w-5 h-5" />
-                            専用Wordテンプレをダウンロード
-                          </button>
-                          <p className="text-xs text-slate-500">
-                            ※Wordの自動書式（おせっかい機能）が暴走するのを防ぎます
-                          </p>
-                        </div>
-                      )}
+                        )}
+
+                        {isCopied && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg border-2 border-green-500 p-4 text-center animate-in fade-in zoom-in duration-300 z-10">
+                            <div className="bg-green-100 p-3 rounded-full mb-3 shadow-sm">
+                              <CheckCircle className="w-8 h-8 text-green-600" />
+                            </div>
+                            <h3 className="font-bold text-slate-800 text-lg mb-2">クリップボードにコピーしました</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                              以下の<strong className="text-blue-700">「専用Wordテンプレート」</strong>を開き、<br/>
+                              <strong className="bg-yellow-100 px-1">「テキストのみ保持」</strong>で貼り付けてください。
+                            </p>
+                            <button onClick={() => alert('実際の運用では、ここで「絶対にインデントが崩れないように設定されたWordファイル(.docx)」がダウンロードされます。')} className="flex items-center gap-2 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-lg font-bold transition-colors mb-3 shadow-sm">
+                              <FileText className="w-5 h-5" />
+                              専用Wordテンプレをダウンロード
+                            </button>
+                            <p className="text-xs text-slate-500">
+                              ※Wordの自動書式（おせっかい機能）が暴走するのを防ぎます
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </main>
 
               {/* モーダル：使い方ガイド */}
