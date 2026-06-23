@@ -45,6 +45,8 @@
     .tb-l.act,.tb-w.act { background:var(--blue); color:#fff; }
     .tb-g { background:var(--amber-l); color:var(--amber); border:1px solid #fde68a; border-bottom:none; }
     .tb-g.act { background:var(--amber); color:#fff; }
+    .tb-c { background:#fdf2f8; color:#9d174d; border:1px solid #fbcfe8; border-bottom:none; }
+    .tb-c.act { background:#9d174d; color:#fff; border-color:#9d174d; }
 
     /* MAIN */
     main { max-width:1100px; margin:0 auto; padding:24px; }
@@ -128,6 +130,35 @@
     .bdw:hover { background:var(--blue-l); }
     .cn { font-size:.7rem; color:var(--s500); }
 
+    /* COURT FORMAT */
+    .cf-info { background:#fdf2f8; border:1px solid #fbcfe8; border-radius:var(--r); padding:14px 18px; margin-bottom:18px; }
+    .cf-info-title { font-weight:700; color:#9d174d; font-size:.88rem; display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .cf-rules { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px; }
+    .cf-tag { background:#fce7f3; color:#9d174d; border-radius:99px; padding:3px 12px; font-size:.74rem; font-weight:700; border:1px solid #fbcfe8; }
+    .cf-panel-wrap { display:grid; grid-template-columns:1fr 56px 1fr; gap:16px; align-items:stretch; }
+    @media(max-width:680px){ .cf-panel-wrap { grid-template-columns:1fr; } .cf-panel-wrap .pc { order:1; display:flex; justify-content:center; } }
+    .cf-panel { background:#fff; border:1px solid var(--s200); border-radius:var(--r); padding:16px; display:flex; flex-direction:column; box-shadow:var(--sh); }
+    .cf-panel-in { height:460px; }
+    .cf-panel-out { min-height:460px; }
+    .bpp-c { width:52px; height:52px; border-radius:50%; border:none; background:#9d174d; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:var(--shm); transition:background .15s,transform .1s; flex-shrink:0; }
+    .bpp-c:hover { background:#831843; }
+    .bpp-c:active { transform:scale(.93); }
+    .bcp-c { display:flex; align-items:center; gap:5px; padding:7px 12px; border:none; border-radius:var(--rs); font-size:.76rem; font-weight:700; cursor:pointer; transition:background .15s; font-family:inherit; background:#9d174d; color:#fff; }
+    .bcp-c:hover { background:#831843; }
+    .bcp-c:disabled { background:var(--s300); cursor:not-allowed; }
+    .bcp-c.ok { background:#dcfce7; color:#15803d; }
+    .cf-out-wrap { flex:1; position:relative; display:flex; flex-direction:column; gap:10px; }
+    .cf-errors { background:#fef2f2; border:1px solid #fecaca; border-radius:var(--rs); padding:10px 14px; font-size:.78rem; color:#b91c1c; line-height:1.7; display:none; }
+    .cf-errors.show { display:block; }
+    .cf-errors strong { display:block; margin-bottom:4px; font-size:.82rem; }
+    .cf-out-ta { flex:1; min-height:300px; font-family:'MS Mincho','游明朝','Noto Serif JP',serif !important; font-size:.82rem; line-height:1.9; letter-spacing:.02em; }
+    .cf-legend { background:var(--s50); border:1px solid var(--s200); border-radius:var(--rs); padding:10px 14px; }
+    .cf-legend-title { font-size:.76rem; font-weight:700; color:var(--s600); margin-bottom:6px; }
+    .cf-legend-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+    @media(max-width:600px){ .cf-legend-grid { grid-template-columns:repeat(2,1fr); } }
+    .cf-legend-item { font-size:.72rem; color:var(--s600); line-height:1.5; }
+    .cf-legend-item span { font-weight:700; color:#9d174d; }
+
     /* MODAL */
     .mo { position:fixed; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; z-index:200; padding:16px; }
     .md { background:#fff; border-radius:18px; box-shadow:0 10px 25px rgba(0,0,0,.15); width:100%; overflow:hidden; }
@@ -206,9 +237,9 @@
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       テンプレート選択
     </button>
-    <button class="tb tb-l" data-tab="layout">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-      レイアウト・段落
+    <button class="tb tb-c" data-tab="court">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+      裁判書面整形
     </button>
     <button class="tb tb-w" data-tab="words">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
@@ -226,46 +257,11 @@
   <div id="tab-template">
     <div class="tmpl-hint">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-      テンプレートを選択し「このテンプレートを使う」を押すと、レイアウト整形タブに読み込まれます。
+      テンプレートを選択し「このテンプレートを使う」を押すと、裁判書面整形タブに読み込まれます。
     </div>
     <div class="tg">
       <div class="cl" id="catList"></div>
       <div id="tmplArea"></div>
-    </div>
-  </div>
-
-  <!-- レイアウト・段落タブ -->
-  <div id="tab-layout" class="dn">
-    <div class="ep">
-      <div class="pn">
-        <div class="ph"><span class="pl">元のテキスト</span></div>
-        <textarea id="in-l" placeholder="ここにテキストを貼り付けてください"></textarea>
-      </div>
-      <div class="pc">
-        <button class="bpp" id="proc-l">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </button>
-      </div>
-      <div class="pn">
-        <div class="ph">
-          <span class="pl">処理結果</span>
-          <button class="bcp" id="cp-l" disabled>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-            コピー
-          </button>
-        </div>
-        <div class="ow">
-          <textarea id="out-l" readonly></textarea>
-          <div class="eh" id="eh-l"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>中央のボタンを押して<br>処理を実行します</div>
-          <div class="cov dn" id="cov-l">
-            <div class="ci"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
-            <div class="ct">クリップボードにコピーしました</div>
-            <div class="cs">Wordで右クリック →<br><strong>「テキストのみ保持」</strong>で貼り付けてください</div>
-            <button class="bdw" onclick="alert('専用Wordテンプレートがダウンロードされます。')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>専用Wordテンプレをダウンロード</button>
-            <div class="cn">※ Wordの自動書式が暴走するのを防ぎます</div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -339,6 +335,76 @@
             <div class="ci"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
             <div class="ct">クリップボードにコピーしました</div>
             <div class="cs">Wordで右クリック →<br><strong>「テキストのみ保持」</strong>で貼り付けてください</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 裁判書面整形タブ -->
+  <div id="tab-court" class="dn">
+    <div class="cf-info">
+      <div class="cf-info-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+        裁判所書面 書式ルール（最高裁・日弁連基準準拠）
+      </div>
+      <div class="cf-rules">
+        <span class="cf-tag">A4縦・MS明朝12pt</span>
+        <span class="cf-tag">1行37文字・26行/頁</span>
+        <span class="cf-tag">句点「。」読点「、」</span>
+        <span class="cf-tag">改行2つ＝大区分 / 改行1つ＝小区分</span>
+        <span class="cf-tag">階層ごとに全角1字インデント</span>
+        <span class="cf-tag">小数点は「．」</span>
+      </div>
+    </div>
+    <div class="cf-panel-wrap">
+      <div class="cf-panel cf-panel-in">
+        <div class="ph">
+          <span class="pl">番号・インデントなしで自由に入力</span>
+          <button class="bcp-c" id="clear-c" style="background:#fce7f3;color:#9d174d;font-size:.72rem;padding:5px 10px;">クリア</button>
+        </div>
+        <textarea id="in-c" placeholder="ここに文章をそのまま貼り付けてください。
+
+【改行2つ】で「第一・第二…」の大区分に、
+【改行1つ】で「一・二…」の小区分になります。
+
+例：
+原告は令和○年○月○日に…
+
+被告は同年○月○日に…
+
+被告の行為は以下の理由により違法である。
+損害賠償請求権が発生する。
+慰謝料の算定については…"></textarea>
+      </div>
+      <div class="pc">
+        <button class="bpp-c" id="proc-c">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="cf-panel cf-panel-out">
+        <div class="ph">
+          <span class="pl">整形済み・裁判所書式</span>
+          <button class="bcp-c" id="cp-c" disabled>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            コピー
+          </button>
+        </div>
+        <div class="cf-out-wrap">
+          <div class="cf-errors" id="cf-errors"></div>
+          <textarea id="out-c" class="cf-out-ta" readonly placeholder="整形結果がここに表示されます"></textarea>
+        </div>
+        <div class="cf-legend" style="margin-top:10px;">
+          <div class="cf-legend-title">見出し番号の階層構造（裁判所書面標準）</div>
+          <div class="cf-legend-grid">
+            <div class="cf-legend-item"><span>第一</span>　大区分（改行2つ）</div>
+            <div class="cf-legend-item"><span>一</span>　　中区分（改行1つ）</div>
+            <div class="cf-legend-item"><span>（一）</span>　小区分</div>
+            <div class="cf-legend-item"><span>ア</span>　　細区分</div>
+            <div class="cf-legend-item"><span>（ア）</span>　さらに細分</div>
+            <div class="cf-legend-item"><span>a</span>　　最細区分</div>
+            <div class="cf-legend-item" style="color:#b91c1c;font-weight:700;">⚠ 番号飛びはエラー通知</div>
+            <div class="cf-legend-item">句読点：。、に統一</div>
           </div>
         </div>
       </div>
@@ -430,7 +496,7 @@ let activeTab='template', activeCat='契約書類', selTmpl=null;
 
 // タブ切替
 const tabBtns=document.querySelectorAll('.tb');
-const panes={template:document.getElementById('tab-template'),layout:document.getElementById('tab-layout'),words:document.getElementById('tab-words'),govForm:document.getElementById('tab-govForm')};
+const panes={template:document.getElementById('tab-template'),words:document.getElementById('tab-words'),govForm:document.getElementById('tab-govForm'),court:document.getElementById('tab-court')};
 function switchTab(t){
   activeTab=t;
   tabBtns.forEach(b=>b.classList.toggle('act',b.dataset.tab===t));
@@ -464,31 +530,17 @@ function renderArea(){
   document.querySelectorAll('.tc').forEach(b=>b.addEventListener('click',()=>{selTmpl=cat.items.find(i=>i.name===b.dataset.name);renderArea();}));
   const ub=document.getElementById('useBtn');
   if(ub)ub.addEventListener('click',()=>{
-    document.getElementById('in-l').value=selTmpl.text;
-    document.getElementById('out-l').value='';
-    document.getElementById('eh-l').style.display='';
-    document.getElementById('cov-l').classList.add('dn');
-    document.getElementById('cp-l').disabled=true;
-    switchTab('layout');
+    document.getElementById('in-c').value=selTmpl.text;
+    document.getElementById('out-c').value='';
+    document.getElementById('cp-c').disabled=true;
+    document.getElementById('cf-errors').classList.remove('show');
+    switchTab('court');
   });
 }
 renderCats();renderArea();
 document.getElementById('logoBtn').addEventListener('click',()=>{activeCat='契約書類';selTmpl=null;renderCats();renderArea();switchTab('template');});
 
 // 整形処理
-function fmtLayout(txt){
-  return txt.split('\n').map(line=>{
-    let t=line.replace(/^[ \t　]+/,'');
-    if(!t)return'';
-    let lv=0;
-    if(/^第[一二三四五六七八九十百千0-9０-９]+[章節条]/.test(t))lv=0;
-    else if(/^[0-9０-９]+[\.．\s]/.test(t)||/^第[一二三四五六七八九十百千0-9０-９]+項/.test(t))lv=1;
-    else if(/^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮]/.test(t)||/^[0-9０-９]+[)）]/.test(t)||/^第[一二三四五六七八九十百千0-9０-９]+号/.test(t))lv=2;
-    else if(/^[(（]?[ア-ンあ-ん][)）]?[、\.\s]/.test(t)||/^[ア-ンあ-ん][、\.]/.test(t))lv=3;
-    else lv=1;
-    return'　'.repeat(lv)+t;
-  }).join('\n');
-}
 function fmtWords(txt){
   let r=txt;
   const k=document.getElementById('rKou').value,o=document.getElementById('rOtsu').value;
@@ -518,7 +570,6 @@ function setupProc(procId,inId,outId,ehId,covId,cpId,fmt){
     document.getElementById(cpId).disabled=false;
   });
 }
-setupProc('proc-l','in-l','out-l','eh-l','cov-l','cp-l',fmtLayout);
 setupProc('proc-w','in-w','out-w','eh-w','cov-w','cp-w',fmtWords);
 setupProc('proc-g','in-g','out-g','eh-g','cov-g','cp-g',fmtGov);
 
@@ -537,9 +588,165 @@ function setupCopy(cpId,outId,covId){
     setTimeout(()=>{cov.classList.add('dn');btn.classList.remove('ok');btn.innerHTML=COPY_ICON;},2500);
   });
 }
-setupCopy('cp-l','out-l','cov-l');
 setupCopy('cp-w','out-w','cov-w');
 setupCopy('cp-g','out-g','cov-g');
+
+// ===== 裁判書面整形エンジン =====
+// 漢数字変換テーブル
+const KAN=['〇','一','二','三','四','五','六','七','八','九','十'];
+function toKan(n){
+  if(n<=10)return KAN[n];
+  if(n<20)return'十'+(n%10===0?'':KAN[n%10]);
+  return KAN[Math.floor(n/10)]+'十'+(n%10===0?'':KAN[n%10]);
+}
+// 階層ラベル生成
+function mkLabel(level,counters){
+  switch(level){
+    case 0:return'第'+toKan(counters[0])+'　';         // 第一　
+    case 1:return'　'+toKan(counters[1])+'　';         // 　一　
+    case 2:return'　　（'+toKan(counters[2])+'）　';   // 　　（一）　
+    case 3:return'　　　'+aRow(counters[3])+'　';      // 　　　ア　
+    case 4:return'　　　　（'+aRow(counters[4])+'）　';// 　　　　（ア）　
+    case 5:return'　　　　　'+String.fromCharCode(96+counters[5])+'　'; // a
+    case 6:return'　　　　　　（'+String.fromCharCode(96+counters[6])+'）　'; // （a）
+  }
+  return'';
+}
+const ARow=['ア','イ','ウ','エ','オ','カ','キ','ク','ケ','コ','サ','シ','ス','セ','ソ','タ','チ','ツ','テ','ト'];
+function aRow(n){return ARow[n-1]||'ア';}
+// インデントのみ（本文行）
+function bodyIndent(level){return'　'.repeat(level+1);}
+
+// 句読点・小数点の統一
+function fixPunct(s){
+  return s
+    .replace(/、/g,'、').replace(/，/g,'、').replace(/,(?=[^\d])/g,'、')
+    .replace(/。/g,'。').replace(/\./g,'。')
+    .replace(/(\d)\.(\d)/g,'$1．$2'); // 数字間の . は ．（小数点）に
+}
+
+// メイン整形関数
+function fmtCourt(raw){
+  const errors=[];
+  // 句読点統一
+  raw=fixPunct(raw);
+  // 改行の正規化（\r\n → \n）
+  raw=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  // 空白行を整理（3つ以上の空行は2つに圧縮）
+  raw=raw.replace(/\n{3,}/g,'\n\n');
+
+  // ブロック分割：改行2つで大ブロック、改行1つで小ブロック
+  const bigBlocks=raw.split(/\n\n+/);
+
+  const counters=[0,0,0,0,0,0,0]; // 各レベルのカウンタ
+  let level=0; // 現在の見出しレベル（0=第一、1=一…）
+  const outLines=[];
+
+  bigBlocks.forEach((block,bi)=>{
+    if(!block.trim())return;
+    const smallBlocks=block.split(/\n/);
+
+    // 大ブロックの先頭行 → レベル0（第一）見出し
+    const firstLine=smallBlocks[0].trim();
+    if(!firstLine)return;
+
+    // 大ブロック → 第一レベル
+    counters[0]++;
+    for(let i=1;i<counters.length;i++)counters[i]=0; // 下位カウンタをリセット
+    // 見出し番号が存在する場合は除去してラベルを付け直す
+    const cleanFirst=stripExistingLabel(firstLine);
+    outLines.push(mkLabel(0,counters)+cleanFirst);
+
+    // 残りの小行 → レベル1以下
+    let subLevel=1;
+    for(let si=1;si<smallBlocks.length;si++){
+      const line=smallBlocks[si].trim();
+      if(!line)continue;
+      // 既存の見出し番号で階層を検出
+      const detectedLevel=detectLevel(line);
+      if(detectedLevel>=0){
+        subLevel=detectedLevel;
+      }
+      // カウンタ更新
+      counters[subLevel]++;
+      for(let i=subLevel+1;i<counters.length;i++)counters[i]=0;
+      const cleanLine=stripExistingLabel(line);
+      outLines.push(mkLabel(subLevel,counters)+cleanLine);
+    }
+
+    if(bi<bigBlocks.length-1)outLines.push(''); // 大区分間の空行
+  });
+
+  // エラーチェック：飛び番検出
+  let prevC=[...counters];
+  // （簡易チェック）第一が0のまま処理終了 → 入力なし
+  if(counters[0]===0){
+    errors.push('⚠ テキストが空か、改行が含まれていません。');
+  }
+
+  return{text:outLines.join('\n'),errors};
+}
+
+// 既存の見出し番号を剥がす
+function stripExistingLabel(line){
+  return line
+    .replace(/^第[一二三四五六七八九十百千\d]+[　\s]+/,'')
+    .replace(/^[一二三四五六七八九十百千]+[　\s]+/,'')
+    .replace(/^（[一二三四五六七八九十百千]+）[　\s]*/,'')
+    .replace(/^[アイウエオカキクケコサシスセソタチツテト][　\s]+/,'')
+    .replace(/^（[アイウエオカキクケコサシスセソタチツテト]）[　\s]*/,'')
+    .replace(/^[a-z][　\s]+/,'')
+    .replace(/^（[a-z]）[　\s]*/,'')
+    .trim();
+}
+
+// 行から階層レベルを検出（既存番号がある場合）
+function detectLevel(line){
+  if(/^第[一二三四五六七八九十百千\d]+/.test(line))return 0;
+  if(/^（[一二三四五六七八九十百千]+）/.test(line))return 2;
+  if(/^[一二三四五六七八九十百千]+[　\s]/.test(line))return 1;
+  if(/^（[アイウエオカキクケコサシスセソタチツテト]）/.test(line))return 4;
+  if(/^[アイウエオカキクケコサシスセソタチツテト][　\s]/.test(line))return 3;
+  if(/^（[a-z]）/.test(line))return 6;
+  if(/^[a-z][　\s]/.test(line))return 5;
+  return -1; // 検出不能 → 前のレベルを継続
+}
+
+// 裁判書面整形ボタン
+document.getElementById('proc-c').addEventListener('click',()=>{
+  const inp=document.getElementById('in-c').value;
+  if(!inp.trim())return;
+  const{text,errors}=fmtCourt(inp);
+  document.getElementById('out-c').value=text;
+  document.getElementById('cp-c').disabled=false;
+  const errEl=document.getElementById('cf-errors');
+  if(errors.length){
+    errEl.innerHTML='<strong>⚠ 書式チェック結果</strong>'+errors.map(e=>`<div>${e}</div>`).join('');
+    errEl.classList.add('show');
+  } else {
+    errEl.classList.remove('show');
+  }
+});
+
+// クリアボタン
+document.getElementById('clear-c').addEventListener('click',()=>{
+  document.getElementById('in-c').value='';
+  document.getElementById('out-c').value='';
+  document.getElementById('cp-c').disabled=true;
+  document.getElementById('cf-errors').classList.remove('show');
+});
+
+// 裁判書面コピー
+document.getElementById('cp-c').addEventListener('click',async()=>{
+  const txt=document.getElementById('out-c').value;
+  if(!txt)return;
+  try{await navigator.clipboard.writeText(txt);}
+  catch{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch{}document.body.removeChild(ta);}
+  const btn=document.getElementById('cp-c');
+  btn.classList.add('ok');
+  btn.innerHTML=CHECK_ICON;
+  setTimeout(()=>{btn.classList.remove('ok');btn.innerHTML=COPY_ICON;},2500);
+});
 
 // モーダル
 function openM(id){document.getElementById(id).classList.remove('dn');}
@@ -552,10 +759,28 @@ document.getElementById('closeSettings').addEventListener('click',()=>closeM('se
 document.getElementById('settingsModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('settingsModal');});
 
 // デモ・クリア
+const COURT_DEMO=`原告は令和○年○月○日に被告との間で業務委託契約を締結した。
+契約内容はウェブサイトの制作であり対価は金○○○万円であった。
+
+原告は同年○月○日に成果物を納品した。
+被告はこれを受領したが代金を支払わなかった。
+催告書を送付したが無視された。
+
+よって原告は以下の請求をする。
+金○○○万円の支払いを求める。
+遅延損害金の支払いを求める。`;
 const DEMO={l:'第1条（目的）\n本契約は、委託者○○株式会社（以下「甲」という。）と受託者○○株式会社（以下「乙」という。）との間で、甲が乙に委託するシステム開発業務に関する基本的事項を定めることを目的とする。\n第2条（委託業務の範囲）\n甲が乙に委託する業務の範囲は、別紙「業務仕様書」に定める通りとする。\n2 乙は、善良なる管理者の注意をもって本業務を遂行しなければならない。\n3 乙は、本業務の遂行にあたり、甲の事前の書面による承諾なく、第三者に再委託してはならない。',w:'甲及び乙は、本契約の目的を達成するため、相互に誠実に協力する義務を負う。\n甲又は乙のいずれかが本契約の条項に違反した場合、他方当事者は書面により催告した上で本契約を解除することができる。但し、相手方が破産手続の開始決定を受けた場合は、催告を要せず直ちに解除できる。',g:'本件補助金の交付申請にあたり、申請者である当社は令和○年○月○日に事業計画を策定し、同年○月○日に関係機関との事前協議を経た上で、本申請書を提出するものであります。当社は○○県○○市において○○事業を営む中小企業であり、今般の設備投資により生産効率を30％向上させるとともに、新規雇用を5名創出することを計画しております。'};
 const tabKey={layout:'l',words:'w',govForm:'g'};
 function showMsg(txt,type){const el=document.getElementById('smsg');el.textContent=txt;el.className=`smsg ${type}`;setTimeout(()=>{el.className='smsg hid';},3000);}
 document.getElementById('loadDemo').addEventListener('click',()=>{
+  if(activeTab==='court'){
+    document.getElementById('in-c').value=COURT_DEMO;
+    document.getElementById('out-c').value='';
+    document.getElementById('cp-c').disabled=true;
+    document.getElementById('cf-errors').classList.remove('show');
+    showMsg('デモデータをセットしました。','suc');
+    return;
+  }
   const k=tabKey[activeTab];
   if(k&&DEMO[k]){
     document.getElementById(`in-${k}`).value=DEMO[k];
@@ -567,13 +792,17 @@ document.getElementById('loadDemo').addEventListener('click',()=>{
   showMsg('デモデータをセットしました。','suc');
 });
 document.getElementById('clearData').addEventListener('click',()=>{
-  ['l','w','g'].forEach(k=>{
+  ['w','g'].forEach(k=>{
     document.getElementById(`in-${k}`).value='';
     document.getElementById(`out-${k}`).value='';
     document.getElementById(`eh-${k}`).style.display='';
     document.getElementById(`cov-${k}`).classList.add('dn');
     document.getElementById(`cp-${k}`).disabled=true;
   });
+  document.getElementById('in-c').value='';
+  document.getElementById('out-c').value='';
+  document.getElementById('cp-c').disabled=true;
+  document.getElementById('cf-errors').classList.remove('show');
   showMsg('データをクリアしました。','inf');
 });
 </script>
