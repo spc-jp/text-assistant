@@ -1,938 +1,581 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>法務テキスト整形・統一アシスタント</title>
-    <link rel="icon" type="image/png" href="https://spc-jp.github.io/text-assistant/favicon.png">
-    
-    <!-- スタイル（Tailwind CSS）とReact本体を読み込む -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- ブラウザ内でReact(JSX)を動かすための翻訳機 -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>リーガルテキスト・アシスタント</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-d:#1d4ed8; --blue-l:#eff6ff;
+      --emerald:#059669; --emerald-d:#047857; --emerald-l:#ecfdf5;
+      --amber:#d97706; --amber-d:#b45309; --amber-l:#fffbeb;
+      --purple:#7c3aed; --purple-l:#f5f3ff;
+      --green:#16a34a; --green-l:#f0fdf4;
+      --s50:#f8fafc; --s100:#f1f5f9; --s200:#e2e8f0; --s300:#cbd5e1;
+      --s400:#94a3b8; --s500:#64748b; --s600:#475569; --s700:#334155;
+      --s800:#1e293b; --s900:#0f172a;
+      --r:12px; --rs:8px;
+      --sh:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+      --shm:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+    }
+    body { font-family:'Noto Sans JP',sans-serif; background:var(--s50); color:var(--s800); min-height:100vh; }
+
+    /* HEADER */
+    header { background:#fff; border-bottom:1px solid var(--s200); position:sticky; top:0; z-index:100; box-shadow:var(--sh); }
+    .hi { max-width:1100px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+    .logo { display:flex; align-items:center; gap:10px; cursor:pointer; border:none; background:none; font-family:inherit; }
+    .logo-ic { background:var(--blue); border-radius:var(--rs); width:38px; height:38px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .logo-tx { font-size:1.1rem; font-weight:700; color:var(--s900); }
+    .hbtns { display:flex; gap:6px; }
+    .gbtn { display:flex; align-items:center; gap:6px; padding:8px 12px; border:none; background:none; border-radius:var(--rs); font-size:.82rem; font-weight:700; color:var(--s600); cursor:pointer; transition:background .15s,color .15s; font-family:inherit; }
+    .gbtn:hover { background:var(--s100); color:var(--s900); }
+    .gbtn.guide:hover { background:var(--blue-l); color:var(--blue); }
+    .gbtn span { display:none; }
+    @media(min-width:600px){ .gbtn span { display:inline; } }
+
+    /* TABS */
+    .tabs { max-width:1100px; margin:0 auto; padding:0 24px; display:flex; flex-wrap:wrap; gap:4px; margin-top:10px; }
+    .tb { display:flex; align-items:center; gap:6px; padding:10px 14px; border:none; border-radius:10px 10px 0 0; font-size:.82rem; font-weight:700; cursor:pointer; transition:background .15s,color .15s; font-family:inherit; }
+    .tb-t { background:var(--emerald-l); color:var(--emerald); border:1px solid #a7f3d0; border-bottom:none; }
+    .tb-t.act { background:var(--emerald); color:#fff; }
+    .tb-l,.tb-w { background:var(--s100); color:var(--s600); }
+    .tb-l.act,.tb-w.act { background:var(--blue); color:#fff; }
+    .tb-g { background:var(--amber-l); color:var(--amber); border:1px solid #fde68a; border-bottom:none; }
+    .tb-g.act { background:var(--amber); color:#fff; }
+
+    /* MAIN */
+    main { max-width:1100px; margin:0 auto; padding:24px; }
+    .dn { display:none !important; }
+
+    /* TEMPLATE */
+    .tmpl-hint { background:var(--emerald-l); border:1px solid #a7f3d0; border-radius:var(--r); padding:12px 16px; font-size:.82rem; font-weight:700; color:var(--emerald-d); display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+    .tg { display:grid; grid-template-columns:210px 1fr; gap:20px; }
+    @media(max-width:680px){ .tg { grid-template-columns:1fr; } }
+    .cl { display:flex; flex-direction:column; gap:6px; }
+    .cb { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border:1px solid var(--s200); border-radius:var(--r); background:#fff; font-weight:700; font-size:.82rem; color:var(--s600); cursor:pointer; transition:all .15s; font-family:inherit; }
+    .cb:hover { background:var(--s50); }
+    .cb.ab { background:var(--blue-l); border-color:#bfdbfe; color:#1e40af; }
+    .cb.ap { background:var(--purple-l); border-color:#ddd6fe; color:#5b21b6; }
+    .cb.ag { background:var(--green-l); border-color:#bbf7d0; color:#15803d; }
+    .bdg { font-size:.7rem; padding:2px 8px; border-radius:99px; font-weight:700; }
+    .bdb { background:#dbeafe; color:var(--blue); }
+    .bdp { background:#ede9fe; color:var(--purple); }
+    .bdg2 { background:#dcfce7; color:var(--green); }
+    .tcs { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+    @media(max-width:840px){ .tcs { grid-template-columns:1fr 1fr; } }
+    @media(max-width:480px){ .tcs { grid-template-columns:1fr; } }
+    .tc { text-align:left; padding:14px; background:#fff; border:2px solid var(--s200); border-radius:var(--r); cursor:pointer; transition:all .15s; font-family:inherit; }
+    .tc:hover { border-color:var(--s300); background:var(--s50); }
+    .tc.sel { border-color:var(--emerald); background:var(--emerald-l); }
+    .tc-n { font-weight:700; font-size:.82rem; color:var(--s800); margin-bottom:4px; }
+    .tc-d { font-size:.73rem; color:var(--s500); line-height:1.5; }
+    .tp { background:#fff; border:2px solid #a7f3d0; border-radius:var(--r); overflow:hidden; }
+    .tp-h { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:var(--emerald-l); border-bottom:1px solid #a7f3d0; }
+    .tp-ht { font-weight:700; font-size:.82rem; color:#065f46; }
+    .btn-use { display:flex; align-items:center; gap:6px; background:var(--emerald); color:#fff; border:none; border-radius:var(--rs); padding:8px 14px; font-size:.82rem; font-weight:700; cursor:pointer; transition:background .15s; font-family:inherit; }
+    .btn-use:hover { background:var(--emerald-d); }
+    .tp pre { padding:16px; font-size:.76rem; color:var(--s700); line-height:1.7; white-space:pre-wrap; font-family:inherit; max-height:360px; overflow-y:auto; }
+
+    /* WORDS OPTS */
+    .wopts { background:#fff; border:1px solid var(--s200); border-radius:var(--r); padding:14px 18px; margin-bottom:18px; display:flex; flex-wrap:wrap; gap:18px; align-items:center; box-shadow:var(--sh); }
+    .olb { font-size:.82rem; font-weight:700; color:var(--s700); }
+    .oi { border:1px solid var(--s300); border-radius:6px; padding:6px 10px; font-size:.82rem; width:120px; font-family:inherit; outline:none; }
+    .oi:focus { border-color:var(--blue); box-shadow:0 0 0 2px #bfdbfe; }
+    .ock { display:flex; align-items:center; gap:8px; cursor:pointer; }
+    .ock input { width:16px; height:16px; accent-color:var(--blue); cursor:pointer; }
+
+    /* GOVFORM OPTS */
+    .gopts { background:var(--amber-l); border:1px solid #fde68a; border-radius:var(--r); padding:14px 18px; margin-bottom:18px; }
+    .gt { font-weight:700; color:#92400e; font-size:.88rem; display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+    .gd { font-size:.76rem; color:#92400e; margin-bottom:12px; line-height:1.5; }
+    .gr { display:flex; align-items:center; gap:10px; }
+    .gn { border:1px solid #fbbf24; border-radius:6px; padding:6px 10px; font-size:.82rem; width:76px; font-family:inherit; outline:none; background:#fff; }
+    .gn:focus { border-color:var(--amber); box-shadow:0 0 0 2px #fde68a; }
+
+    /* EDITOR */
+    .ep { display:grid; grid-template-columns:1fr 56px 1fr; gap:16px; align-items:stretch; }
+    @media(max-width:680px){ .ep { grid-template-columns:1fr; } .pc { order:1; display:flex; justify-content:center; } }
+    .pn { background:#fff; border:1px solid var(--s200); border-radius:var(--r); padding:16px; display:flex; flex-direction:column; height:420px; box-shadow:var(--sh); }
+    .ph { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .pl { font-size:.78rem; font-weight:700; color:var(--s500); }
+    textarea { flex:1; width:100%; border:1px solid var(--s200); border-radius:var(--rs); padding:12px; font-size:.8rem; line-height:1.8; resize:none; background:var(--s50); color:var(--s800); font-family:inherit; outline:none; transition:border-color .15s,box-shadow .15s; }
+    textarea:focus { border-color:var(--blue); box-shadow:0 0 0 2px #bfdbfe; }
+    .pc { display:flex; align-items:center; justify-content:center; }
+    .bpp { width:52px; height:52px; border-radius:50%; border:none; background:var(--blue); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:var(--shm); transition:background .15s,transform .1s; flex-shrink:0; }
+    .bpp:hover { background:var(--blue-d); }
+    .bpp:active { transform:scale(.93); }
+    .bpp:disabled { background:var(--s300); cursor:not-allowed; }
+    .bpp.am { background:var(--amber); }
+    .bpp.am:hover { background:var(--amber-d); }
+    .bcp { display:flex; align-items:center; gap:5px; padding:7px 12px; border:none; border-radius:var(--rs); font-size:.76rem; font-weight:700; cursor:pointer; transition:background .15s; font-family:inherit; background:var(--s800); color:#fff; }
+    .bcp:hover { background:var(--s700); }
+    .bcp:disabled { background:var(--s300); cursor:not-allowed; }
+    .bcp.ok { background:#dcfce7; color:#15803d; }
+    .bcp.am2 { background:var(--amber); }
+    .bcp.am2:hover { background:var(--amber-d); }
+    .ow { flex:1; position:relative; }
+    .ow textarea { height:100%; }
+    .eh { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--s400); pointer-events:none; gap:8px; font-size:.82rem; text-align:center; }
+    .cov { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,.92); backdrop-filter:blur(4px); border-radius:var(--rs); border:2px solid #22c55e; z-index:10; text-align:center; gap:10px; animation:fi .2s ease; }
+    @keyframes fi { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
+    .ci { background:#dcfce7; border-radius:50%; width:50px; height:50px; display:flex; align-items:center; justify-content:center; }
+    .ct { font-weight:700; font-size:.95rem; color:var(--s800); }
+    .cs { font-size:.78rem; color:var(--s600); line-height:1.6; }
+    .bdw { display:flex; align-items:center; gap:6px; background:#fff; border:2px solid var(--blue); color:var(--blue); border-radius:var(--rs); padding:8px 14px; font-size:.8rem; font-weight:700; cursor:pointer; transition:background .15s; font-family:inherit; }
+    .bdw:hover { background:var(--blue-l); }
+    .cn { font-size:.7rem; color:var(--s500); }
+
+    /* MODAL */
+    .mo { position:fixed; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; z-index:200; padding:16px; }
+    .md { background:#fff; border-radius:18px; box-shadow:0 10px 25px rgba(0,0,0,.15); width:100%; overflow:hidden; }
+    .md.gm { max-width:620px; max-height:90vh; display:flex; flex-direction:column; }
+    .md.sm { max-width:360px; }
+    .mh { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid var(--s200); background:var(--s50); flex-shrink:0; }
+    .mt { font-size:1rem; font-weight:700; color:var(--s800); display:flex; align-items:center; gap:8px; }
+    .bcl { width:34px; height:34px; border:none; background:none; border-radius:50%; cursor:pointer; color:var(--s400); display:flex; align-items:center; justify-content:center; transition:background .15s,color .15s; font-family:inherit; }
+    .bcl:hover { background:var(--s200); color:var(--s700); }
+    .mb { padding:22px 26px; overflow-y:auto; }
+    .gs { margin-bottom:26px; }
+    .gs:last-child { margin-bottom:0; }
+    .gs h3 { font-size:.95rem; font-weight:700; color:var(--s800); padding-bottom:8px; border-bottom:2px solid var(--s100); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+    .gs p.gp { font-size:.85rem; color:var(--s700); line-height:1.7; font-weight:700; }
+    .fl { display:flex; flex-direction:column; gap:8px; }
+    .fi2 { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:var(--rs); border:1px solid; }
+    .fi2.em { background:var(--emerald-l); border-color:#a7f3d0; }
+    .fi2.bl { background:var(--blue-l); border-color:#bfdbfe; }
+    .fi2.am { background:var(--amber-l); border-color:#fde68a; }
+    .fi2 strong { display:block; font-size:.82rem; margin-bottom:2px; }
+    .fi2.em strong { color:#065f46; }
+    .fi2.bl strong { color:#1e40af; }
+    .fi2.am strong { color:#92400e; }
+    .fi2 p { font-size:.75rem; line-height:1.5; font-weight:400; }
+    .fi2.em p { color:#065f46; }
+    .fi2.bl p { color:#1e40af; }
+    .fi2.am p { color:#92400e; }
+    .sts { display:flex; flex-direction:column; gap:16px; }
+    .st { display:flex; align-items:flex-start; gap:12px; }
+    .sn { flex-shrink:0; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.78rem; margin-top:2px; }
+    .sn.em { background:#d1fae5; color:var(--emerald-d); }
+    .sn.bl { background:#dbeafe; color:var(--blue-d); }
+    .sn.bs { background:var(--blue); color:#fff; }
+    .st strong { display:block; font-size:.85rem; color:var(--s800); margin-bottom:4px; }
+    .st p { font-size:.8rem; color:var(--s600); line-height:1.6; font-weight:400; }
+    .sbx { background:var(--blue-l); border:1px solid #bfdbfe; border-radius:var(--rs); padding:10px 12px; width:100%; }
+    .sbx strong { color:#1e40af; }
+    .sbx p { color:#1e40af; }
+    /* SETTINGS */
+    .sd { font-size:.82rem; color:var(--s600); line-height:1.6; margin-bottom:16px; }
+    .sbs { display:flex; flex-direction:column; gap:10px; }
+    .bdo { display:flex; align-items:center; justify-content:center; gap:8px; padding:11px; border-radius:var(--rs); font-weight:700; font-size:.85rem; cursor:pointer; transition:background .15s; font-family:inherit; }
+    .bdo.bd { background:var(--blue-l); color:#1e40af; border:1px solid #bfdbfe; }
+    .bdo.bd:hover { background:#dbeafe; }
+    .bdo.rd { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+    .bdo.rd:hover { background:#fee2e2; }
+    .smsg { margin-top:12px; padding:10px 12px; border-radius:var(--rs); display:flex; align-items:center; justify-content:center; gap:6px; font-size:.8rem; font-weight:700; transition:opacity .3s; }
+    .smsg.suc { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+    .smsg.inf { background:var(--s100); color:var(--s700); border:1px solid var(--s200); }
+    .smsg.hid { opacity:0; pointer-events:none; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
-    
-    <!-- アプリが表示される場所 -->
-    <div id="root"></div>
-
-    <!-- ここからがアプリのプログラム -->
-    <script type="text/babel">
-        const { useState } = React;
-
-        // --- アイコンの設定（文字化けや読み込みエラーを防ぐため図形として直接定義） ---
-        const Icon = ({ children, className }) => (
-          <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {children}
-          </svg>
-        );
-        const ArrowRight = ({className}) => <Icon className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Icon>;
-        const Copy = ({className}) => <Icon className={className}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></Icon>;
-        const CheckCircle = ({className}) => <Icon className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></Icon>;
-        const FileText = ({className}) => <Icon className={className}><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></Icon>;
-        const AlertCircle = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></Icon>;
-        const List = ({className}) => <Icon className={className}><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></Icon>;
-        const Type = ({className}) => <Icon className={className}><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></Icon>;
-        const FileOutput = ({className}) => <Icon className={className}><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></Icon>;
-        const Settings = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></Icon>;
-        const HelpCircle = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></Icon>;
-        const X = ({className}) => <Icon className={className}><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></Icon>;
-        const Info = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></Icon>;
-        const Trash2 = ({className}) => <Icon className={className}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
-        const Zap = ({className}) => <Icon className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></Icon>;
-        const BookOpen = ({className}) => <Icon className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
-        const ChevronDown = ({className}) => <Icon className={className}><path d="m6 9 6 6 6-6"/></Icon>;
-        const ChevronUp = ({className}) => <Icon className={className}><path d="m18 15-6-6-6 6"/></Icon>;
-
-        // --- テンプレートデータ ---
-        const TEMPLATES = [
-          {
-            category: '契約書類',
-            color: 'blue',
-            items: [
-              {
-                name: '業務委託契約書',
-                desc: '業務の委託・受託関係を定める基本契約',
-                text: `業務委託契約書
-
-委託者 ○○株式会社（以下「甲」という。）と受託者 ○○株式会社（以下「乙」という。）は、以下の通り業務委託契約（以下「本契約」という。）を締結する。
-
-第1条（目的）
-甲は乙に対し、下記の業務（以下「本業務」という。）を委託し、乙はこれを受託する。
-
-第2条（委託業務の内容）
-本業務の内容は、別紙「業務内容仕様書」に定める通りとする。
-
-第3条（委託料）
-1 甲は乙に対し、本業務の対価として、月額金○○円（税別）を支払うものとする。
-2 支払方法は、毎月末日締め翌月末日払いとする。
-
-第4条（再委託の禁止）
-乙は、甲の書面による事前の承諾なく、本業務の全部または一部を第三者に再委託してはならない。
-
-第5条（秘密保持）
-1 甲及び乙は、本契約の履行に際して知り得た相手方の業務上・技術上の情報を第三者に漏洩し、または本契約の履行以外の目的に使用してはならない。
-2 前項の義務は、本契約終了後も2年間存続する。
-
-第6条（契約期間）
-本契約の有効期間は、契約締結日から1年間とする。ただし、期間満了の1ヶ月前までに甲乙いずれかから書面による解約の申し出がない場合は、同一条件で1年間自動更新するものとし、以後も同様とする。
-
-第7条（契約解除）
-1 甲または乙は、相手方が本契約の条項に違反し、相当期間を定めて催告したにもかかわらず是正されない場合、本契約を解除することができる。
-2 甲または乙は、相手方が破産、民事再生、会社更生等の手続の申立てを受けまたは自ら申し立てた場合、何らの通知・催告を要せず本契約を解除することができる。
-
-第8条（損害賠償）
-甲または乙は、本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。
-
-第9条（協議事項）
-本契約に定めのない事項または疑義が生じた場合は、甲乙協議の上、誠実に解決を図るものとする。
-
-第10条（合意管轄）
-本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。
-
-以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。
-
-令和　　年　　月　　日
-
-甲　住所：
-　　氏名：　　　　　　　　　　　　㊞
-
-乙　住所：
-　　氏名：　　　　　　　　　　　　㊞`
-              },
-              {
-                name: '秘密保持契約書（NDA）',
-                desc: '情報の非開示・秘密保持を約束する契約',
-                text: `秘密保持契約書
-
-○○株式会社（以下「甲」という。）と○○株式会社（以下「乙」という。）は、両社間の業務提携の検討（以下「本件目的」という。）のために必要な情報の開示に関し、以下の通り秘密保持契約（以下「本契約」という。）を締結する。
-
-第1条（秘密情報の定義）
-1 「秘密情報」とは、甲乙が本件目的のために相手方に開示する技術上、営業上その他一切の情報であって、開示に際して秘密である旨を明示したものをいう。
-2 次の各号のいずれかに該当する情報は秘密情報から除外する。
-①開示を受けた時点ですでに公知であった情報
-②開示を受けた後、受領者の責に帰すべき事由によらず公知となった情報
-③開示を受けた時点ですでに受領者が保有していた情報
-④受領者が第三者から秘密保持義務を負わずに取得した情報
-
-第2条（秘密保持義務）
-甲及び乙は、相手方から開示された秘密情報を善良な管理者の注意をもって管理し、本件目的以外に使用せず、また第三者に開示もしくは漏洩してはならない。
-
-第3条（複製の制限）
-甲及び乙は、相手方の書面による事前の承諾なく、秘密情報を複製してはならない。
-
-第4条（契約期間）
-本契約の有効期間は契約締結日から1年間とし、秘密保持義務は本契約終了後2年間存続する。
-
-第5条（秘密情報の返還）
-甲及び乙は、相手方から要求があった場合または本契約が終了した場合、相手方の秘密情報及びその複製物を速やかに返還または廃棄しなければならない。
-
-第6条（損害賠償）
-甲または乙が本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。
-
-第7条（合意管轄）
-本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。
-
-以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。
-
-令和　　年　　月　　日
-
-甲　住所：
-　　氏名：　　　　　　　　　　　　㊞
-
-乙　住所：
-　　氏名：　　　　　　　　　　　　㊞`
-              },
-              {
-                name: '金銭消費貸借契約書',
-                desc: '金銭の貸し借りを定める契約書',
-                text: `金銭消費貸借契約書
-
-貸主 ○○（以下「甲」という。）と借主 ○○（以下「乙」という。）は、以下の通り金銭消費貸借契約を締結する。
-
-第1条（貸付）
-甲は乙に対し、以下の条件にて金銭を貸し付け、乙はこれを借り受けた。
-①貸付金額：金○○○万円
-②貸付日：令和　　年　　月　　日
-③利息：年　　％（元利均等返済）
-④返済期限：令和　　年　　月　　日
-
-第2条（返済方法）
-乙は甲に対し、毎月　　日限り、金○○○円を甲の指定する銀行口座に振り込む方法により返済する。振込手数料は乙の負担とする。
-
-第3条（期限の利益の喪失）
-乙が次の各号のいずれかに該当した場合、乙は甲から通知・催告を受けることなく、当然に期限の利益を失い、残債務の全額を直ちに弁済しなければならない。
-①返済を1回でも怠ったとき
-②住所・連絡先の変更を届け出ずに所在が不明となったとき
-③破産・民事再生等の申立てを受けまたは自ら申し立てたとき
-
-第4条（遅延損害金）
-乙が返済を遅延した場合、乙は遅延した元本に対し、年　　％の割合による遅延損害金を甲に支払わなければならない。
-
-第5条（合意管轄）
-本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。
-
-以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。
-
-令和　　年　　月　　日
-
-甲　住所：
-　　氏名：　　　　　　　　　　　　㊞
-
-乙　住所：
-　　氏名：　　　　　　　　　　　　㊞`
-              },
-            ]
-          },
-          {
-            category: '士業書式',
-            color: 'purple',
-            items: [
-              {
-                name: '内容証明通知書（請求書）',
-                desc: '支払請求・督促のための内容証明用書式',
-                text: `通　知　書
-
-○○株式会社
-代表取締役 ○○ ○○ 殿
-
-令和　　年　　月　　日
-
-通知人　　○○ ○○
-代理人弁護士　○○法律事務所
-弁護士　○○ ○○
-〒○○○-○○○○
-○○県○○市○○町○－○－○
-TEL：○○○-○○○○-○○○○
-
-拝啓
-
-私は、○○ ○○（以下「依頼者」といいます。）の代理人として、以下の通り通知します。
-
-第1　請求の趣旨
-貴社は依頼者に対し、令和　　年　　月　　日付け○○契約（以下「本契約」といいます。）に基づく代金金○○○万円及びこれに対する支払期日である令和　　年　　月　　日から完済まで年　　％の割合による遅延損害金を支払う義務があります。
-
-第2　請求の理由
-依頼者と貴社は、令和　　年　　月　　日、○○を目的とする本契約を締結しました。依頼者は本契約上の義務を全て履行しましたが、貴社は支払期日を過ぎた現在においても、上記代金を支払っておりません。
-
-第3　請求
-ついては、本通知到達後7日以内に、上記金員を下記口座にお振り込みください。
-
-記
-金融機関：○○銀行○○支店
-口座種別：普通預金
-口座番号：○○○○○○○
-口座名義：○○ ○○
-
-期日までにお支払いいただけない場合は、法的措置を取ることもやむを得ないことをあらかじめご承知おきください。
-
-敬具`
-              },
-              {
-                name: '陳述書（民事訴訟用）',
-                desc: '民事訴訟・調停における陳述書の基本書式',
-                text: `陳　述　書
-
-令和　　年　　月　　日
-
-○○地方裁判所　御中
-
-陳述者　　○○ ○○　㊞
-
-私は、○○事件（令和　　年（○）第○○○○号）について、以下の通り陳述します。
-
-第1　当事者について
-1 私（以下「申立人」といいます。）は、○○在住の○○業を営む者です。
-2 相手方○○（以下「相手方」といいます。）とは、令和　　年頃から○○を通じて知り合いました。
-
-第2　経緯について
-1 令和　　年　　月　　日、私と相手方は○○について話し合いを行いました。
-2 その際、相手方は「○○する」旨を約束しました（甲第○号証）。
-3 しかし、相手方はその後、上記約束を履行しませんでした。
-
-第3　損害について
-1 相手方の上記行為により、私は以下の損害を被りました。
-①○○　　　金○○○万円
-②○○　　　金○○○万円
-2 合計損害額は金○○○万円です。
-
-第4　まとめ
-以上の通り、相手方には○○の義務があります。裁判所におかれましては、申立人の請求を認容する判断をいただけますよう、お願い申し上げます。
-
-以上`
-              },
-              {
-                name: '遺産分割協議書',
-                desc: '相続人間の遺産分割を定める協議書',
-                text: `遺産分割協議書
-
-被相続人　○○ ○○（令和　　年　　月　　日死亡）の遺産について、共同相続人全員による遺産分割の協議を行った結果、以下の通り合意した。
-
-第1条（相続財産の確認）
-被相続人の遺産は、別紙「相続財産目録」記載の通りである。
-
-第2条（相続人○○が取得する財産）
-次の財産は、相続人○○ ○○（以下「甲」という。）が取得する。
-①不動産
-　所在：○○市○○町○番地
-　地番：○番○
-　地目：宅地
-　地積：○○.○○㎡
-　（登記簿上の表示）
-
-第3条（相続人○○が取得する財産）
-次の財産は、相続人○○ ○○（以下「乙」という。）が取得する。
-①預貯金
-　○○銀行○○支店　普通預金　口座番号○○○○○○○
-　残高　金○○○万円
-
-第4条（相続債務の負担）
-被相続人の相続債務については、甲及び乙が法定相続分に従い負担する。
-
-第5条（その他の財産）
-本協議書に記載のない遺産（後日判明したものを含む。）については、甲乙協議の上、決定する。
-
-以上の通り遺産分割協議が成立したので、本書を○通作成し、各自1通を保有する。
-
-令和　　年　　月　　日
-
-相続人（甲）住所：
-　　　　　　氏名：　　　　　　　　　　　　㊞
-
-相続人（乙）住所：
-　　　　　　氏名：　　　　　　　　　　　　㊞`
-              },
-            ]
-          },
-          {
-            category: '申請・届出書類',
-            color: 'green',
-            items: [
-              {
-                name: '示談書（交通事故）',
-                desc: '交通事故の示談・解決を定める書面',
-                text: `示　談　書
-
-加害者 ○○ ○○（以下「甲」という。）と被害者 ○○ ○○（以下「乙」という。）は、令和　　年　　月　　日に○○において発生した交通事故（以下「本件事故」という。）について、以下の通り示談が成立した。
-
-第1条（損害賠償額）
-甲は乙に対し、本件事故による損害賠償として、金○○○万円を支払うことを認める。
-
-第2条（支払方法）
-甲は乙に対し、前条の金員を令和　　年　　月　　日限り、乙の指定する下記銀行口座に振り込む方法にて支払う。
-金融機関：○○銀行○○支店
-口座種別：普通預金
-口座番号：○○○○○○○
-口座名義：○○ ○○
-
-第3条（清算条項）
-乙は、本示談書に定める以外には、本件事故に関して甲及び甲の加入する保険会社に対し、将来いかなる名目であっても金銭その他の請求を行わないことを確認する。
-
-第4条（宥恕条項）
-乙は、本示談の成立をもって甲を宥恕する。
-
-以上の通り示談が成立したので、本書2通を作成し、甲乙各1通を保有する。
-
-令和　　年　　月　　日
-
-甲　住所：
-　　氏名：　　　　　　　　　　　　㊞
-
-乙　住所：
-　　氏名：　　　　　　　　　　　　㊞`
-              },
-              {
-                name: '解雇通知書',
-                desc: '労働者への解雇を通知する書面',
-                text: `解　雇　通　知　書
-
-○○ ○○ 殿
-
-令和　　年　　月　　日
-
-○○株式会社
-代表取締役　○○ ○○
-
-拝啓
-
-貴殿は、令和　　年　　月　　日付けにて、当社を解雇することをここに通知します。
-
-解雇理由は以下の通りです。
-
-記
-
-1 解雇理由
-①○○（就業規則第○条第○号に該当）
-②○○
-
-2 解雇予告手当
-労働基準法第20条に基づき、本通知日より30日に不足する　　日分の平均賃金相当額（金○○○円）を解雇予告手当として支払います。
-
-3 退職手続き
-令和　　年　　月　　日までに、以下の書類・物品を返却してください。
-①会社貸与品（社員証・制服・鍵など）
-②業務上の書類・データ
-
-なお、本件について不服がある場合は、労働局・労働審判等の手続きを利用することができます。
-
-敬具`
-              },
-              {
-                name: '合意書（一般用）',
-                desc: '当事者間の合意・約束を確認する書面',
-                text: `合　意　書
-
-○○ ○○（以下「甲」という。）と○○ ○○（以下「乙」という。）は、以下の通り合意した。
-
-第1条（合意の目的）
-甲及び乙は、○○に関して以下の通り合意する。
-
-第2条（甲の義務）
-甲は乙に対し、以下のことを行う。
-①○○
-②○○
-
-第3条（乙の義務）
-乙は甲に対し、以下のことを行う。
-①○○
-②○○
-
-第4条（有効期間）
-本合意書の有効期間は、令和　　年　　月　　日から令和　　年　　月　　日までとする。
-
-第5条（誠実協議）
-本合意書に定めのない事項または本合意書の解釈に疑義が生じた場合は、甲乙誠実に協議して解決するものとする。
-
-以上の通り合意したので、本書2通を作成し、甲乙各1通を保有する。
-
-令和　　年　　月　　日
-
-甲　住所：
-　　氏名：　　　　　　　　　　　　㊞
-
-乙　住所：
-　　氏名：　　　　　　　　　　　　㊞`
-              },
-            ]
-          },
-        ];
-
-        // --- メインアプリ ---
-        function App() {
-          const [activeTab, setActiveTab] = useState('template');
-          const [inputText, setInputText] = useState('');
-          const [outputText, setOutputText] = useState('');
-          const [isCopied, setIsCopied] = useState(false);
-
-          // デモ・ガイド用の状態
-          const [isGuideOpen, setIsGuideOpen] = useState(false);
-          const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-          const [settingsMessage, setSettingsMessage] = useState({ text: '', type: '' });
-
-          // タブ2用の設定状態
-          const [replaceKou, setReplaceKou] = useState('');
-          const [replaceOtsu, setReplaceOtsu] = useState('');
-          const [fixKanas, setFixKanas] = useState(true);
-
-          // タブ3用の設定状態
-          const [charsPerLine, setCharsPerLine] = useState(35);
-
-          // テンプレートタブ用の状態
-          const [openCategory, setOpenCategory] = useState('契約書類');
-          const [selectedTemplate, setSelectedTemplate] = useState(null);
-          const [templateLoaded, setTemplateLoaded] = useState(false);
-
-          const colorMap = {
-            blue:   { badge: 'bg-blue-100 text-blue-700', header: 'bg-blue-50 border-blue-200 text-blue-800', card: 'hover:border-blue-300 hover:bg-blue-50', btn: 'bg-blue-600 hover:bg-blue-700' },
-            purple: { badge: 'bg-purple-100 text-purple-700', header: 'bg-purple-50 border-purple-200 text-purple-800', card: 'hover:border-purple-300 hover:bg-purple-50', btn: 'bg-purple-600 hover:bg-purple-700' },
-            green:  { badge: 'bg-green-100 text-green-700', header: 'bg-green-50 border-green-200 text-green-800', card: 'hover:border-green-300 hover:bg-green-50', btn: 'bg-green-600 hover:bg-green-700' },
-          };
-
-          const handleLoadTemplate = (template) => {
-            setSelectedTemplate(template);
-            setTemplateLoaded(false);
-          };
-
-          const handleUseTemplate = () => {
-            setInputText(selectedTemplate.text);
-            setOutputText('');
-            setTemplateLoaded(true);
-            setActiveTab('layout');
-          };
-
-          const formatLayout = (text) => {
-            const lines = text.split('\n');
-            let currentIndentLevel = 0;
-            
-            return lines.map(line => {
-              let trimmed = line.replace(/^[ \t　]+/, '');
-              if (trimmed.length === 0) return '';
-
-              if (/^第[一二三四五六七八九十百千0-9０-９]+[章節条]/.test(trimmed)) {
-                currentIndentLevel = 0;
-              } else if (/^[0-9０-９]+[\.．\s]/.test(trimmed) || /^第[一二三四五六七八九十百千0-9０-９]+項/.test(trimmed)) {
-                currentIndentLevel = 1;
-              } else if (/^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮]/.test(trimmed) || /^[0-9０-９]+[)）]/.test(trimmed) || /^第[一二三四五六七八九十百千0-9０-９]+号/.test(trimmed)) {
-                currentIndentLevel = 2;
-              } else if (/^[(（]?[ア-ンあ-ん][)）]?[、\.\s]/.test(trimmed) || /^[ア-ンあ-ん][、\.]/.test(trimmed)) {
-                currentIndentLevel = 3;
-              } else {
-                if (currentIndentLevel === 0) currentIndentLevel = 1;
-              }
-
-              const indentSpace = '　'.repeat(currentIndentLevel);
-              return indentSpace + trimmed;
-            }).join('\n');
-          };
-
-          const formatWords = (text) => {
-            let result = text;
-            if (replaceKou) result = result.replace(/甲/g, replaceKou);
-            if (replaceOtsu) result = result.replace(/乙/g, replaceOtsu);
-            if (fixKanas) {
-              result = result.replace(/及び/g, 'および').replace(/並びに/g, 'ならびに')
-                           .replace(/又は/g, 'または').replace(/若しくは/g, 'もしくは')
-                           .replace(/従って/g, 'したがって').replace(/但し/g, 'ただし');
-            }
-            return result;
-          };
-
-          const formatForGov = (text, limit) => {
-            const flatText = text.replace(/\n/g, '');
-            let result = '';
-            for (let i = 0; i < flatText.length; i += limit) {
-              result += flatText.substring(i, i + limit) + '\n';
-            }
-            return result.trim();
-          };
-
-          const handleProcess = () => {
-            if (!inputText.trim()) return;
-
-            let resultText = '';
-            if (activeTab === 'layout') resultText = formatLayout(inputText);
-            else if (activeTab === 'words') resultText = formatWords(inputText);
-            else if (activeTab === 'govForm') {
-              const limit = parseInt(charsPerLine, 10);
-              if (isNaN(limit) || limit < 1) return;
-              resultText = formatForGov(inputText, limit);
-            }
-
-            setOutputText(resultText);
-            setIsCopied(false);
-          };
-
-          const handleCopy = async () => {
-            if (!outputText) return;
-            try {
-              await navigator.clipboard.writeText(outputText);
-              setIsCopied(true);
-              setTimeout(() => setIsCopied(false), 2000);
-            } catch (err) {
-              const textArea = document.createElement("textarea");
-              textArea.value = outputText;
-              document.body.appendChild(textArea);
-              textArea.select();
-              try {
-                document.execCommand('copy');
-                setIsCopied(true);
-                setTimeout(() => setIsCopied(false), 2000);
-              } catch (e) {}
-              document.body.removeChild(textArea);
-            }
-          };
-
-          const insertSample = () => {
-            if (activeTab === 'layout') {
-              setInputText(`第1条（目的）
-本契約は、委託者○○株式会社（以下「甲」という。）と受託者○○株式会社（以下「乙」という。）との間で、甲が乙に委託するシステム開発業務に関する基本的事項を定めることを目的とする。
-第2条（委託業務の範囲）
-甲が乙に委託する業務の範囲は、別紙「業務仕様書」に定める通りとする。
-2 乙は、善良なる管理者の注意をもって本業務を遂行しなければならない。
-3 乙は、本業務の遂行にあたり、甲の事前の書面による承諾なく、第三者に再委託してはならない。
-第3条（委託料及び支払方法）
-甲は乙に対し、本業務の対価として月額金30万円（消費税別）を支払うものとする。
-2 支払は毎月末日締め、翌月25日限り、乙の指定する銀行口座への振込による。振込手数料は甲の負担とする。
-第4条（秘密保持）
-甲及び乙は、本契約の履行に際して知り得た相手方の技術上・営業上その他一切の情報を第三者に漏洩し、または本契約の履行以外の目的に使用してはならない。
-2 前項の義務は、本契約終了後も3年間存続するものとする。
-第5条（契約期間）
-本契約の有効期間は、令和○年○月○日から令和○年○月○日までとする。ただし、期間満了の1か月前までに甲乙いずれかから書面による解約の申し出がない場合は、同一条件でさらに1年間自動更新するものとし、以後も同様とする。
-第6条（契約解除）
-甲または乙は、相手方が本契約の条項に違反し、相当期間を定めて催告したにもかかわらず是正されない場合、本契約を解除することができる。
-2 甲または乙は、相手方が破産、民事再生、会社更生等の手続の申立てを受けまたは自ら申し立てた場合、何らの通知・催告を要せず直ちに本契約を解除することができる。
-第7条（損害賠償）
-甲または乙は、本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。ただし、賠償額は本契約に基づき甲が乙に支払った直近3か月分の委託料の合計額を上限とする。
-第8条（合意管轄）
-本契約に関する紛争については、東京地方裁判所を第一審の専属的合意管轄裁判所とする。`);
-            } else if (activeTab === 'words') {
-              setInputText(`甲及び乙は、本契約の目的を達成するため、相互に誠実に協力する義務を負う。
-甲又は乙のいずれかが本契約の条項に違反した場合、他方当事者は書面により催告した上で本契約を解除することができる。但し、相手方が破産手続の開始決定を受けた場合は、催告を要せず直ちに解除できる。
-甲及び乙は、本契約の締結並びに履行に関して知り得た相手方の秘密情報を、第三者に漏洩し若しくは開示し、又は本契約の目的以外に使用してはならない。
-前項の義務は、本契約終了後においても3年間存続するものとする。
-本契約に定めのない事項又は本契約の解釈に疑義が生じた場合は、甲及び乙が誠実に協議の上、解決するものとする。
-甲は本業務を遂行するにあたり、従って定められた手順に従わなければならない。但し、乙の事前承認を得た場合はこの限りではない。`);
-            } else if (activeTab === 'govForm') {
-              setInputText(`本件補助金の交付申請にあたり、申請者である当社は令和○年○月○日に事業計画を策定し、同年○月○日に関係機関との事前協議を経た上で、本申請書を提出するものであります。当社は○○県○○市において○○事業を営む中小企業であり、今般の設備投資により生産効率を30％向上させるとともに、新規雇用を5名創出することを計画しております。当該設備の導入により、製品の品質向上および納期短縮が見込まれ、既存取引先への安定供給はもとより、新規顧客の開拓にも資するものと確信しております。なお、本補助事業の実施にあたっては、関係法令を遵守し、適正な経理処理を行うとともに、事業完了後においても補助金の交付目的に沿った事業運営を継続することをここに誓約いたします。つきましては、別添の事業計画書および見積書をご査収いただき、何卒補助金の交付につきましてご承認賜りますよう、よろしくお願い申し上げます。`);
-            }
-          };
-
-          const handleLoadDemo = () => {
-            insertSample();
-            setSettingsMessage({ text: 'デモデータをセットしました。', type: 'success' });
-            setTimeout(() => setSettingsMessage({ text: '', type: '' }), 3000);
-          };
-
-          const handleClearData = () => {
-            setInputText('');
-            setOutputText('');
-            setSettingsMessage({ text: 'データをクリアしました。', type: 'info' });
-            setTimeout(() => setSettingsMessage({ text: '', type: '' }), 3000);
-          };
-
-          return (
-            <div className="min-h-screen relative">
-              <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-                <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-                  <button onClick={() => { setActiveTab('template'); setOutputText(''); setSelectedTemplate(null); }} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
-                      <FileText className="text-white w-6 h-6" />
-                    </div>
-                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">リーガルテキスト・アシスタント</h1>
-                  </button>
-
-                  <div className="flex items-center gap-1 md:gap-3">
-                    <button onClick={() => setIsGuideOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                      <HelpCircle className="w-5 h-5" />
-                      <span className="hidden md:inline">使い方ガイド</span>
-                    </button>
-                    <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-                      <Settings className="w-5 h-5" />
-                      <span className="hidden md:inline">設定・デモ</span>
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-wrap gap-1 mt-2">
-                  <button onClick={() => {setActiveTab('template'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'template' ? 'bg-emerald-600 text-white shadow-inner' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 border-b-0'}`}>
-                    <BookOpen className="w-4 h-4" /> テンプレート選択
-                  </button>
-                  <button onClick={() => {setActiveTab('layout'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'layout' ? 'bg-blue-600 text-white shadow-inner' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                    <List className="w-4 h-4" /> レイアウト・段落
-                  </button>
-                  <button onClick={() => {setActiveTab('words'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'words' ? 'bg-blue-600 text-white shadow-inner' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                    <Type className="w-4 h-4" /> 用語・表記の統一
-                  </button>
-                  <button onClick={() => {setActiveTab('govForm'); setOutputText('');}} className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-bold transition-colors text-sm md:text-base ${activeTab === 'govForm' ? 'bg-amber-600 text-white shadow-inner' : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 border-b-0'}`}>
-                    <FileOutput className="w-4 h-4" /> 役所フォーマット対策
-                  </button>
-                </div>
-              </header>
-
-              <main className="max-w-6xl mx-auto p-4 md:p-8">
-
-                {activeTab === 'template' && (
-                  <div>
-                    <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                      <p className="text-emerald-800 text-sm font-bold flex items-center gap-2">
-                        <BookOpen className="w-4 h-4" />
-                        テンプレートを選択し、「このテンプレートを使う」ボタンを押すと、レイアウト整形タブにテキストが読み込まれます。
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
-                      {/* カテゴリ一覧 */}
-                      <div className="flex flex-col gap-2">
-                        {TEMPLATES.map(cat => {
-                          const c = colorMap[cat.color];
-                          return (
-                            <button key={cat.category} onClick={() => { setOpenCategory(cat.category); setSelectedTemplate(null); }}
-                              className={`flex items-center justify-between px-4 py-3 rounded-xl border font-bold text-sm transition-all ${openCategory === cat.category ? c.header + ' border shadow-sm' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-                              <span>{cat.category}</span>
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${c.badge}`}>{cat.items.length}件</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* テンプレート一覧＋プレビュー */}
-                      <div className="flex flex-col gap-4">
-                        {TEMPLATES.filter(cat => cat.category === openCategory).map(cat => {
-                          const c = colorMap[cat.color];
-                          return (
-                            <div key={cat.category}>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                                {cat.items.map(tmpl => (
-                                  <button key={tmpl.name} onClick={() => handleLoadTemplate(tmpl)}
-                                    className={`text-left p-4 bg-white border-2 rounded-xl transition-all ${selectedTemplate?.name === tmpl.name ? 'border-emerald-500 bg-emerald-50 shadow-md' : 'border-slate-200 ' + c.card}`}>
-                                    <p className="font-bold text-slate-800 text-sm mb-1">{tmpl.name}</p>
-                                    <p className="text-xs text-slate-500 leading-relaxed">{tmpl.desc}</p>
-                                  </button>
-                                ))}
-                              </div>
-
-                              {selectedTemplate && (
-                                <div className="bg-white border-2 border-emerald-300 rounded-xl overflow-hidden shadow-sm">
-                                  <div className="flex items-center justify-between px-5 py-3 bg-emerald-50 border-b border-emerald-200">
-                                    <h3 className="font-bold text-emerald-900 text-sm">{selectedTemplate.name} — プレビュー</h3>
-                                    <button onClick={handleUseTemplate}
-                                      className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors shadow-sm">
-                                      <ArrowRight className="w-4 h-4" />
-                                      このテンプレートを使う
-                                    </button>
-                                  </div>
-                                  <pre className="p-5 text-xs text-slate-700 leading-relaxed whitespace-pre-wrap font-sans overflow-y-auto max-h-96">{selectedTemplate.text}</pre>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'words' && (
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-6 items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-slate-700">甲を置換:</span>
-                      <input type="text" placeholder="例: 買主" className="border border-slate-300 rounded px-2 py-1 text-sm w-32" value={replaceKou} onChange={e => setReplaceKou(e.target.value)} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-slate-700">乙を置換:</span>
-                      <input type="text" placeholder="例: 売主" className="border border-slate-300 rounded px-2 py-1 text-sm w-32" value={replaceOtsu} onChange={e => setReplaceOtsu(e.target.value)} />
-                    </div>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={fixKanas} onChange={e => setFixKanas(e.target.checked)} className="w-4 h-4 text-blue-600 rounded border-gray-300" />
-                      <span className="text-sm font-bold text-slate-700">接続詞をひらがなに統一</span>
-                    </label>
-                  </div>
-                )}
-
-                {activeTab === 'govForm' && (
-                  <div className="bg-amber-50 p-4 rounded-xl shadow-sm border border-amber-200 mb-6">
-                    <h3 className="font-bold text-amber-900 mb-2 flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4" /> 指定した文字数で強制的に改行を入れます
-                    </h3>
-                    <p className="text-amber-800 text-xs mb-3">
-                      役所のWordフォーマットで「枠が広がる」「次のページに押し出される」のを防ぐため、指定の文字数でテキストを折り返します。
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-amber-900">1行あたりの最大文字数:</span>
-                      <input type="number" min="10" max="100" className="border border-amber-300 rounded px-3 py-1 text-sm w-20 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono" value={charsPerLine} onChange={e => setCharsPerLine(e.target.value)} />
-                      <span className="text-sm text-amber-900 font-bold">文字</span>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab !== 'template' && (
-                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-stretch">
-
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
-                      <div className="flex justify-between items-center mb-2">
-                        <h2 className="text-sm font-bold text-slate-500">
-                          {activeTab === 'govForm' ? '申請理由などの長文をベタ打ち' : '元のテキスト'}
-                        </h2>
-                      </div>
-                      <textarea className="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed text-sm" placeholder="ここにテキストを貼り付けてください" value={inputText} onChange={(e) => setInputText(e.target.value)} />
-                    </div>
-
-                    <div className="flex justify-center items-center py-4 lg:py-0">
-                      <button onClick={handleProcess} disabled={!inputText.trim()} className={`flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-md transition-all active:scale-95 disabled:bg-slate-300 ${activeTab === 'govForm' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
-                        <ArrowRight className="text-white w-6 h-6 lg:rotate-0 rotate-90" />
-                      </button>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[400px]">
-                      <div className="flex justify-between items-center mb-2">
-                        <h2 className="text-sm font-bold text-slate-500">処理結果</h2>
-                        <button onClick={handleCopy} disabled={!outputText} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-bold transition-all ${isCopied ? 'bg-green-100 text-green-700' : activeTab === 'govForm' ? 'bg-amber-700 hover:bg-amber-800 text-white disabled:bg-slate-300' : 'bg-slate-800 hover:bg-slate-700 text-white disabled:bg-slate-300'}`}>
-                          {isCopied ? <><CheckCircle className="w-4 h-4" /> コピー完了</> : <><Copy className="w-4 h-4" /> コピー</>}
-                        </button>
-                      </div>
-                      <div className="flex-1 relative">
-                        <textarea readOnly className={`w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:outline-none leading-relaxed text-sm font-mono transition-opacity duration-300 ${isCopied ? 'opacity-30' : 'opacity-100'}`} value={outputText} style={activeTab === 'govForm' ? { wordBreak: 'break-all' } : {}} />
-
-                        {!outputText && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
-                            <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                            <p className="text-sm text-center">中央のボタンを押して<br/>処理を実行します</p>
-                          </div>
-                        )}
-
-                        {isCopied && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg border-2 border-green-500 p-4 text-center animate-in fade-in zoom-in duration-300 z-10">
-                            <div className="bg-green-100 p-3 rounded-full mb-3 shadow-sm">
-                              <CheckCircle className="w-8 h-8 text-green-600" />
-                            </div>
-                            <h3 className="font-bold text-slate-800 text-lg mb-2">クリップボードにコピーしました</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                              以下の<strong className="text-blue-700">「専用Wordテンプレート」</strong>を開き、<br/>
-                              <strong className="bg-yellow-100 px-1">「テキストのみ保持」</strong>で貼り付けてください。
-                            </p>
-                            <button onClick={() => alert('実際の運用では、ここで「絶対にインデントが崩れないように設定されたWordファイル(.docx)」がダウンロードされます。')} className="flex items-center gap-2 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-lg font-bold transition-colors mb-3 shadow-sm">
-                              <FileText className="w-5 h-5" />
-                              専用Wordテンプレをダウンロード
-                            </button>
-                            <p className="text-xs text-slate-500">
-                              ※Wordの自動書式（おせっかい機能）が暴走するのを防ぎます
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </main>
-
-              {/* モーダル：使い方ガイド */}
-              {isGuideOpen && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
-                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                    <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
-                      <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
-                        <HelpCircle className="w-6 h-6 text-blue-600" /> 
-                        使い方ガイド
-                      </h2>
-                      <button onClick={() => setIsGuideOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="p-6 md:p-8 overflow-y-auto">
-                      <section className="mb-8">
-                        <h3 className="text-lg font-bold text-slate-800 border-b-2 border-blue-100 pb-2 mb-4 flex items-center gap-2">
-                          <Zap className="w-5 h-5 text-amber-500"/>
-                          アプリの目的
-                        </h3>
-                        <p className="text-slate-700 leading-relaxed font-medium">
-                          弁護士・士業の皆様が、Wordの煩わしい体裁調整に奪われている時間をゼロにし、<span className="text-blue-700 font-bold bg-blue-50 px-1">本来の専門的な思考・執筆業務に集中できる環境</span>を提供するためのサポートツールです。
-                        </p>
-                      </section>
-
-                      <section className="mb-8">
-                        <h3 className="text-lg font-bold text-slate-800 border-b-2 border-emerald-100 pb-2 mb-4 flex items-center gap-2">
-                          <BookOpen className="w-5 h-5 text-emerald-500"/>
-                          各タブの機能
-                        </h3>
-                        <div className="space-y-3">
-                          <div className="flex items-start gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                            <BookOpen className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0"/>
-                            <div>
-                              <strong className="block text-emerald-900 text-sm mb-0.5">テンプレート選択</strong>
-                              <p className="text-emerald-800 text-xs leading-relaxed">契約書・士業書式・申請書など9種類のひな形から選んで読み込めます。読み込んだ後は「レイアウト整形」タブで仕上げます。</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <List className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"/>
-                            <div>
-                              <strong className="block text-blue-900 text-sm mb-0.5">レイアウト・段落</strong>
-                              <p className="text-blue-800 text-xs leading-relaxed">第○条・第○項・①②③などの階層を自動認識し、全角スペースで正確にインデントを揃えます。</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <Type className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0"/>
-                            <div>
-                              <strong className="block text-blue-900 text-sm mb-0.5">用語・表記の統一</strong>
-                              <p className="text-blue-800 text-xs leading-relaxed">「甲」「乙」を当事者名に一括置換。「及び→および」「但し→ただし」など接続詞をひらがなに統一します。</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                            <FileOutput className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"/>
-                            <div>
-                              <strong className="block text-amber-900 text-sm mb-0.5">役所フォーマット対策</strong>
-                              <p className="text-amber-800 text-xs leading-relaxed">役所のWordフォームで枠が広がったり次ページにはみ出すのを防ぐため、指定文字数で強制改行します。</p>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
-
-                      <section>
-                        <h3 className="text-lg font-bold text-slate-800 border-b-2 border-blue-100 pb-2 mb-4 flex items-center gap-2">
-                          <List className="w-5 h-5 text-blue-500"/>
-                          基本的な使い方
-                        </h3>
-                        <ul className="space-y-5">
-                          <li className="flex items-start gap-4">
-                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm mt-0.5">1</span>
-                            <div>
-                              <strong className="block text-slate-800 mb-1">テンプレートを選ぶ（任意）</strong>
-                              <p className="text-slate-600 text-sm leading-relaxed">「テンプレート選択」タブでひな形を選び「このテンプレートを使う」を押すと、レイアウト整形タブにテキストが読み込まれます。既存の文書を整形する場合はこの手順は不要です。</p>
-                            </div>
-                          </li>
-                          <li className="flex items-start gap-4">
-                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">2</span>
-                            <div>
-                              <strong className="block text-slate-800 mb-1">テキストを貼り付ける</strong>
-                              <p className="text-slate-600 text-sm leading-relaxed">整形したいテキストを左側のエリアに貼り付けるか、直接入力します。</p>
-                            </div>
-                          </li>
-                          <li className="flex items-start gap-4">
-                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-0.5">3</span>
-                            <div>
-                              <strong className="block text-slate-800 mb-1">「→」ボタンで処理を実行する</strong>
-                              <p className="text-slate-600 text-sm leading-relaxed">中央のボタンを押すと、テキストが一瞬で整形されて右側に表示されます。</p>
-                            </div>
-                          </li>
-                          <li className="flex items-start gap-4">
-                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm mt-0.5">4</span>
-                            <div className="bg-blue-50 p-3 rounded-lg w-full border border-blue-100">
-                              <strong className="block text-blue-900 mb-1">Wordへの貼り付け（重要）</strong>
-                              <p className="text-blue-800 text-sm leading-relaxed">
-                                右側の「コピー」ボタンを押し、Wordで右クリックして<strong>「テキストのみ保持」</strong>を選んで貼り付けます。通常の貼り付けではWordの自動書式が崩れる原因になります。
-                              </p>
-                            </div>
-                          </li>
-                        </ul>
-                      </section>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* モーダル：設定・デモデータ */}
-              {isSettingsOpen && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
-                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
-                    <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
-                      <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800">
-                        <Settings className="w-5 h-5 text-slate-600" /> 
-                        設定・デモ操作
-                      </h2>
-                      <button onClick={() => setIsSettingsOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="p-6">
-                      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-                        プレゼンテーション用のデモデータを操作します。現在のタブに応じたサンプルテキストが挿入されます。
-                      </p>
-                      <div className="flex flex-col gap-3">
-                        <button onClick={handleLoadDemo} className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-lg transition-colors border border-blue-200">
-                          <FileText className="w-5 h-5" />
-                          デモデータをセット
-                        </button>
-                        <button onClick={handleClearData} className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-red-50 text-red-700 hover:bg-red-100 font-bold rounded-lg transition-colors border border-red-200">
-                          <Trash2 className="w-5 h-5" />
-                          入力データをクリア
-                        </button>
-                      </div>
-                      <div className={`mt-4 p-3 rounded-lg flex items-center justify-center gap-2 text-sm font-bold transition-all duration-300 ${settingsMessage.text ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'} ${settingsMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
-                         <Info className="w-4 h-4" />
-                         {settingsMessage.text || '　'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        }
-
-        // アプリの起動
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+<body>
+
+<header>
+  <div class="hi">
+    <button class="logo" id="logoBtn">
+      <div class="logo-ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+      </div>
+      <span class="logo-tx">リーガルテキスト・アシスタント</span>
+    </button>
+    <div class="hbtns">
+      <button class="gbtn guide" id="openGuideBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+        <span>使い方ガイド</span>
+      </button>
+      <button class="gbtn" id="openSettingsBtn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>設定・デモ</span>
+      </button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tb tb-t act" data-tab="template">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      テンプレート選択
+    </button>
+    <button class="tb tb-l" data-tab="layout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+      レイアウト・段落
+    </button>
+    <button class="tb tb-w" data-tab="words">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>
+      用語・表記の統一
+    </button>
+    <button class="tb tb-g" data-tab="govForm">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg>
+      役所フォーマット対策
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- テンプレートタブ -->
+  <div id="tab-template">
+    <div class="tmpl-hint">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      テンプレートを選択し「このテンプレートを使う」を押すと、レイアウト整形タブに読み込まれます。
+    </div>
+    <div class="tg">
+      <div class="cl" id="catList"></div>
+      <div id="tmplArea"></div>
+    </div>
+  </div>
+
+  <!-- レイアウト・段落タブ -->
+  <div id="tab-layout" class="dn">
+    <div class="ep">
+      <div class="pn">
+        <div class="ph"><span class="pl">元のテキスト</span></div>
+        <textarea id="in-l" placeholder="ここにテキストを貼り付けてください"></textarea>
+      </div>
+      <div class="pc">
+        <button class="bpp" id="proc-l">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="pn">
+        <div class="ph">
+          <span class="pl">処理結果</span>
+          <button class="bcp" id="cp-l" disabled>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            コピー
+          </button>
+        </div>
+        <div class="ow">
+          <textarea id="out-l" readonly></textarea>
+          <div class="eh" id="eh-l"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>中央のボタンを押して<br>処理を実行します</div>
+          <div class="cov dn" id="cov-l">
+            <div class="ci"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
+            <div class="ct">クリップボードにコピーしました</div>
+            <div class="cs">Wordで右クリック →<br><strong>「テキストのみ保持」</strong>で貼り付けてください</div>
+            <button class="bdw" onclick="alert('専用Wordテンプレートがダウンロードされます。')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>専用Wordテンプレをダウンロード</button>
+            <div class="cn">※ Wordの自動書式が暴走するのを防ぎます</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 用語・表記の統一タブ -->
+  <div id="tab-words" class="dn">
+    <div class="wopts">
+      <div style="display:flex;align-items:center;gap:8px;"><span class="olb">甲を置換:</span><input type="text" class="oi" id="rKou" placeholder="例: 買主"></div>
+      <div style="display:flex;align-items:center;gap:8px;"><span class="olb">乙を置換:</span><input type="text" class="oi" id="rOtsu" placeholder="例: 売主"></div>
+      <label class="ock"><input type="checkbox" id="fixK" checked><span class="olb">接続詞をひらがなに統一</span></label>
+    </div>
+    <div class="ep">
+      <div class="pn">
+        <div class="ph"><span class="pl">元のテキスト</span></div>
+        <textarea id="in-w" placeholder="ここにテキストを貼り付けてください"></textarea>
+      </div>
+      <div class="pc">
+        <button class="bpp" id="proc-w">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="pn">
+        <div class="ph">
+          <span class="pl">処理結果</span>
+          <button class="bcp" id="cp-w" disabled>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            コピー
+          </button>
+        </div>
+        <div class="ow">
+          <textarea id="out-w" readonly></textarea>
+          <div class="eh" id="eh-w"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>中央のボタンを押して<br>処理を実行します</div>
+          <div class="cov dn" id="cov-w">
+            <div class="ci"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
+            <div class="ct">クリップボードにコピーしました</div>
+            <div class="cs">Wordで右クリック →<br><strong>「テキストのみ保持」</strong>で貼り付けてください</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 役所フォーマット対策タブ -->
+  <div id="tab-govForm" class="dn">
+    <div class="gopts">
+      <div class="gt"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>指定した文字数で強制的に改行を入れます</div>
+      <div class="gd">役所のWordフォーマットで「枠が広がる」「次のページに押し出される」のを防ぐため、指定の文字数でテキストを折り返します。</div>
+      <div class="gr"><span class="olb" style="color:#92400e;">1行あたりの最大文字数:</span><input type="number" class="gn" id="cpl" min="10" max="100" value="35"><span style="font-size:.82rem;font-weight:700;color:#92400e;">文字</span></div>
+    </div>
+    <div class="ep">
+      <div class="pn">
+        <div class="ph"><span class="pl">申請理由などの長文をベタ打ち</span></div>
+        <textarea id="in-g" placeholder="ここにテキストを貼り付けてください"></textarea>
+      </div>
+      <div class="pc">
+        <button class="bpp am" id="proc-g">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="pn">
+        <div class="ph">
+          <span class="pl">処理結果</span>
+          <button class="bcp am2" id="cp-g" disabled>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            コピー
+          </button>
+        </div>
+        <div class="ow">
+          <textarea id="out-g" readonly style="word-break:break-all;"></textarea>
+          <div class="eh" id="eh-g"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>中央のボタンを押して<br>処理を実行します</div>
+          <div class="cov dn" id="cov-g">
+            <div class="ci"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
+            <div class="ct">クリップボードにコピーしました</div>
+            <div class="cs">Wordで右クリック →<br><strong>「テキストのみ保持」</strong>で貼り付けてください</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 使い方ガイド -->
+<div class="mo dn" id="guideModal">
+  <div class="md gm">
+    <div class="mh">
+      <div class="mt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>使い方ガイド</div>
+      <button class="bcl" id="closeGuide"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>
+    </div>
+    <div class="mb">
+      <div class="gs">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>アプリの目的</h3>
+        <p class="gp">弁護士・士業の皆様が、Wordの煩わしい体裁調整に奪われている時間をゼロにし、本来の専門的な思考・執筆業務に集中できる環境を提供するサポートツールです。</p>
+      </div>
+      <div class="gs">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>各タブの機能</h3>
+        <div class="fl">
+          <div class="fi2 em"><div style="flex-shrink:0;margin-top:2px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div><strong>テンプレート選択</strong><p>契約書・士業書式・申請書など9種類のひな形から選んで読み込めます。</p></div></div>
+          <div class="fi2 bl"><div style="flex-shrink:0;margin-top:2px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/></svg></div><div><strong>レイアウト・段落</strong><p>第○条・第○項・①②③などの階層を自動認識し、全角スペースでインデントを揃えます。</p></div></div>
+          <div class="fi2 bl"><div style="flex-shrink:0;margin-top:2px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg></div><div><strong>用語・表記の統一</strong><p>「甲」「乙」を当事者名に一括置換。接続詞をひらがなに統一します。</p></div></div>
+          <div class="fi2 am"><div style="flex-shrink:0;margin-top:2px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/></svg></div><div><strong>役所フォーマット対策</strong><p>指定文字数でテキストを折り返し、Wordの枠崩れを防ぎます。</p></div></div>
+        </div>
+      </div>
+      <div class="gs">
+        <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/></svg>基本的な使い方</h3>
+        <div class="sts">
+          <div class="st"><div class="sn em">1</div><div><strong>テンプレートを選ぶ（任意）</strong><p>「テンプレート選択」タブでひな形を選び「このテンプレートを使う」を押します。既存文書を整形する場合はこの手順は不要です。</p></div></div>
+          <div class="st"><div class="sn bl">2</div><div><strong>テキストを貼り付ける</strong><p>整形したいテキストを左側のエリアに貼り付けます。</p></div></div>
+          <div class="st"><div class="sn bl">3</div><div><strong>「→」ボタンで処理を実行する</strong><p>中央のボタンを押すと一瞬で整形されて右側に表示されます。</p></div></div>
+          <div class="st"><div class="sn bs">4</div><div class="sbx"><strong>Wordへの貼り付け（重要）</strong><p>右側の「コピー」ボタンを押し、Wordで右クリックして<strong>「テキストのみ保持」</strong>を選んで貼り付けます。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 設定・デモ -->
+<div class="mo dn" id="settingsModal">
+  <div class="md sm">
+    <div class="mh">
+      <div class="mt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定・デモ操作</div>
+      <button class="bcl" id="closeSettings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg></button>
+    </div>
+    <div class="mb">
+      <p class="sd">プレゼンテーション用のデモデータを操作します。現在のタブに応じたサンプルテキストが挿入されます。</p>
+      <div class="sbs">
+        <button class="bdo bd" id="loadDemo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>デモデータをセット</button>
+        <button class="bdo rd" id="clearData"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>入力データをクリア</button>
+      </div>
+      <div class="smsg hid" id="smsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TEMPLATES = [
+  { category:'契約書類', color:'blue', items:[
+    { name:'業務委託契約書', desc:'業務の委託・受託関係を定める基本契約',
+      text:'業務委託契約書\n\n委託者 ○○株式会社（以下「甲」という。）と受託者 ○○株式会社（以下「乙」という。）は、以下の通り業務委託契約（以下「本契約」という。）を締結する。\n\n第1条（目的）\n甲は乙に対し、下記の業務（以下「本業務」という。）を委託し、乙はこれを受託する。\n\n第2条（委託業務の内容）\n本業務の内容は、別紙「業務内容仕様書」に定める通りとする。\n\n第3条（委託料）\n1 甲は乙に対し、本業務の対価として、月額金○○円（税別）を支払うものとする。\n2 支払方法は、毎月末日締め翌月末日払いとする。\n\n第4条（再委託の禁止）\n乙は、甲の書面による事前の承諾なく、本業務の全部または一部を第三者に再委託してはならない。\n\n第5条（秘密保持）\n1 甲及び乙は、本契約の履行に際して知り得た相手方の業務上・技術上の情報を第三者に漏洩し、または本契約の履行以外の目的に使用してはならない。\n2 前項の義務は、本契約終了後も2年間存続する。\n\n第6条（契約期間）\n本契約の有効期間は、契約締結日から1年間とする。ただし、期間満了の1ヶ月前までに甲乙いずれかから書面による解約の申し出がない場合は、同一条件で1年間自動更新するものとし、以後も同様とする。\n\n第7条（契約解除）\n1 甲または乙は、相手方が本契約の条項に違反し、相当期間を定めて催告したにもかかわらず是正されない場合、本契約を解除することができる。\n2 甲または乙は、相手方が破産、民事再生、会社更生等の手続の申立てを受けまたは自ら申し立てた場合、何らの通知・催告を要せず本契約を解除することができる。\n\n第8条（損害賠償）\n甲または乙は、本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。\n\n第9条（協議事項）\n本契約に定めのない事項または疑義が生じた場合は、甲乙協議の上、誠実に解決を図るものとする。\n\n第10条（合意管轄）\n本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。\n\n以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。\n\n令和　　年　　月　　日\n\n甲　住所：\n　　氏名：　　　　　　　　　　　　㊞\n\n乙　住所：\n　　氏名：　　　　　　　　　　　　㊞' },
+    { name:'秘密保持契約書（NDA）', desc:'情報の非開示・秘密保持を約束する契約',
+      text:'秘密保持契約書\n\n○○株式会社（以下「甲」という。）と○○株式会社（以下「乙」という。）は、両社間の業務提携の検討（以下「本件目的」という。）のために必要な情報の開示に関し、以下の通り秘密保持契約（以下「本契約」という。）を締結する。\n\n第1条（秘密情報の定義）\n1 「秘密情報」とは、甲乙が本件目的のために相手方に開示する技術上、営業上その他一切の情報であって、開示に際して秘密である旨を明示したものをいう。\n2 次の各号のいずれかに該当する情報は秘密情報から除外する。\n①開示を受けた時点ですでに公知であった情報\n②開示を受けた後、受領者の責に帰すべき事由によらず公知となった情報\n③開示を受けた時点ですでに受領者が保有していた情報\n④受領者が第三者から秘密保持義務を負わずに取得した情報\n\n第2条（秘密保持義務）\n甲及び乙は、相手方から開示された秘密情報を善良な管理者の注意をもって管理し、本件目的以外に使用せず、また第三者に開示もしくは漏洩してはならない。\n\n第3条（複製の制限）\n甲及び乙は、相手方の書面による事前の承諾なく、秘密情報を複製してはならない。\n\n第4条（契約期間）\n本契約の有効期間は契約締結日から1年間とし、秘密保持義務は本契約終了後2年間存続する。\n\n第5条（損害賠償）\n甲または乙が本契約に違反して相手方に損害を与えた場合、その損害を賠償しなければならない。\n\n以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。\n\n令和　　年　　月　　日\n\n甲　住所：\n　　氏名：　　　　　　　　　　　　㊞\n\n乙　住所：\n　　氏名：　　　　　　　　　　　　㊞' },
+    { name:'金銭消費貸借契約書', desc:'金銭の貸し借りを定める契約書',
+      text:'金銭消費貸借契約書\n\n貸主 ○○（以下「甲」という。）と借主 ○○（以下「乙」という。）は、以下の通り金銭消費貸借契約を締結する。\n\n第1条（貸付）\n甲は乙に対し、以下の条件にて金銭を貸し付け、乙はこれを借り受けた。\n①貸付金額：金○○○万円\n②貸付日：令和　　年　　月　　日\n③利息：年　　％（元利均等返済）\n④返済期限：令和　　年　　月　　日\n\n第2条（返済方法）\n乙は甲に対し、毎月　　日限り、金○○○円を甲の指定する銀行口座に振り込む方法により返済する。振込手数料は乙の負担とする。\n\n第3条（期限の利益の喪失）\n乙が次の各号のいずれかに該当した場合、乙は当然に期限の利益を失い、残債務の全額を直ちに弁済しなければならない。\n①返済を1回でも怠ったとき\n②住所・連絡先の変更を届け出ずに所在が不明となったとき\n③破産・民事再生等の申立てを受けまたは自ら申し立てたとき\n\n第4条（遅延損害金）\n乙が返済を遅延した場合、乙は遅延した元本に対し、年　　％の割合による遅延損害金を甲に支払わなければならない。\n\n第5条（合意管轄）\n本契約に関する紛争については、○○地方裁判所を第一審の専属的合意管轄裁判所とする。\n\n以上、本契約の締結の証として本書2通を作成し、甲乙各1通を保有する。\n\n令和　　年　　月　　日\n\n甲　住所：\n　　氏名：　　　　　　　　　　　　㊞\n\n乙　住所：\n　　氏名：　　　　　　　　　　　　㊞' }
+  ]},
+  { category:'士業書式', color:'purple', items:[
+    { name:'内容証明通知書（請求書）', desc:'支払請求・督促のための内容証明用書式',
+      text:'通　知　書\n\n○○株式会社\n代表取締役 ○○ ○○ 殿\n\n令和　　年　　月　　日\n\n通知人　　○○ ○○\n代理人弁護士　○○法律事務所\n弁護士　○○ ○○\n〒○○○-○○○○\n○○県○○市○○町○－○－○\n\n拝啓\n\n私は、○○ ○○（以下「依頼者」といいます。）の代理人として、以下の通り通知します。\n\n第1　請求の趣旨\n貴社は依頼者に対し、令和　　年　　月　　日付け○○契約に基づく代金金○○○万円及びこれに対する支払期日から完済まで年　　％の割合による遅延損害金を支払う義務があります。\n\n第2　請求の理由\n依頼者と貴社は、令和　　年　　月　　日、○○を目的とする契約を締結しました。依頼者は契約上の義務を全て履行しましたが、貴社は支払期日を過ぎた現在においても、上記代金を支払っておりません。\n\n第3　請求\nついては、本通知到達後7日以内に、上記金員を下記口座にお振り込みください。\n\n記\n金融機関：○○銀行○○支店\n口座種別：普通預金\n口座番号：○○○○○○○\n口座名義：○○ ○○\n\n期日までにお支払いいただけない場合は、法的措置を取ることもやむを得ないことをあらかじめご承知おきください。\n\n敬具' },
+    { name:'陳述書（民事訴訟用）', desc:'民事訴訟・調停における陳述書の基本書式',
+      text:'陳　述　書\n\n令和　　年　　月　　日\n\n○○地方裁判所　御中\n\n陳述者　　○○ ○○　㊞\n\n私は、○○事件（令和　　年（○）第○○○○号）について、以下の通り陳述します。\n\n第1　当事者について\n1 私（以下「申立人」といいます。）は、○○在住の○○業を営む者です。\n2 相手方○○（以下「相手方」といいます。）とは、令和　　年頃から知り合いました。\n\n第2　経緯について\n1 令和　　年　　月　　日、私と相手方は○○について話し合いを行いました。\n2 その際、相手方は「○○する」旨を約束しました（甲第○号証）。\n3 しかし、相手方はその後、上記約束を履行しませんでした。\n\n第3　損害について\n1 相手方の上記行為により、私は以下の損害を被りました。\n①○○　　　金○○○万円\n②○○　　　金○○○万円\n2 合計損害額は金○○○万円です。\n\n第4　まとめ\n以上の通り、相手方には○○の義務があります。裁判所におかれましては、申立人の請求を認容する判断をいただけますよう、お願い申し上げます。\n\n以上' },
+    { name:'遺産分割協議書', desc:'相続人間の遺産分割を定める協議書',
+      text:'遺産分割協議書\n\n被相続人　○○ ○○（令和　　年　　月　　日死亡）の遺産について、共同相続人全員による遺産分割の協議を行った結果、以下の通り合意した。\n\n第1条（相続財産の確認）\n被相続人の遺産は、別紙「相続財産目録」記載の通りである。\n\n第2条（相続人○○が取得する財産）\n次の財産は、相続人○○ ○○（以下「甲」という。）が取得する。\n①不動産\n　所在：○○市○○町○番地\n　地番：○番○\n　地目：宅地\n　地積：○○.○○㎡\n\n第3条（相続人○○が取得する財産）\n次の財産は、相続人○○ ○○（以下「乙」という。）が取得する。\n①預貯金\n　○○銀行○○支店　普通預金　口座番号○○○○○○○\n　残高　金○○○万円\n\n第4条（相続債務の負担）\n被相続人の相続債務については、甲及び乙が法定相続分に従い負担する。\n\n第5条（その他の財産）\n本協議書に記載のない遺産については、甲乙協議の上、決定する。\n\n以上の通り遺産分割協議が成立したので、本書を○通作成し、各自1通を保有する。\n\n令和　　年　　月　　日\n\n相続人（甲）住所：\n　　　　　　氏名：　　　　　　　　　　　　㊞\n\n相続人（乙）住所：\n　　　　　　氏名：　　　　　　　　　　　　㊞' }
+  ]},
+  { category:'申請・届出書類', color:'green', items:[
+    { name:'示談書（交通事故）', desc:'交通事故の示談・解決を定める書面',
+      text:'示　談　書\n\n加害者 ○○ ○○（以下「甲」という。）と被害者 ○○ ○○（以下「乙」という。）は、令和　　年　　月　　日に○○において発生した交通事故（以下「本件事故」という。）について、以下の通り示談が成立した。\n\n第1条（損害賠償額）\n甲は乙に対し、本件事故による損害賠償として、金○○○万円を支払うことを認める。\n\n第2条（支払方法）\n甲は乙に対し、前条の金員を令和　　年　　月　　日限り、乙の指定する下記銀行口座に振り込む方法にて支払う。\n金融機関：○○銀行○○支店\n口座種別：普通預金\n口座番号：○○○○○○○\n口座名義：○○ ○○\n\n第3条（清算条項）\n乙は、本示談書に定める以外には、本件事故に関して甲及び甲の加入する保険会社に対し、将来いかなる名目であっても金銭その他の請求を行わないことを確認する。\n\n第4条（宥恕条項）\n乙は、本示談の成立をもって甲を宥恕する。\n\n以上の通り示談が成立したので、本書2通を作成し、甲乙各1通を保有する。\n\n令和　　年　　月　　日\n\n甲　住所：\n　　氏名：　　　　　　　　　　　　㊞\n\n乙　住所：\n　　氏名：　　　　　　　　　　　　㊞' },
+    { name:'解雇通知書', desc:'労働者への解雇を通知する書面',
+      text:'解　雇　通　知　書\n\n○○ ○○ 殿\n\n令和　　年　　月　　日\n\n○○株式会社\n代表取締役　○○ ○○\n\n拝啓\n\n貴殿は、令和　　年　　月　　日付けにて、当社を解雇することをここに通知します。\n\n解雇理由は以下の通りです。\n\n記\n\n1 解雇理由\n①○○（就業規則第○条第○号に該当）\n②○○\n\n2 解雇予告手当\n労働基準法第20条に基づき、本通知日より30日に不足する　　日分の平均賃金相当額（金○○○円）を解雇予告手当として支払います。\n\n3 退職手続き\n令和　　年　　月　　日までに、以下の書類・物品を返却してください。\n①会社貸与品（社員証・制服・鍵など）\n②業務上の書類・データ\n\nなお、本件について不服がある場合は、労働局・労働審判等の手続きを利用することができます。\n\n敬具' },
+    { name:'合意書（一般用）', desc:'当事者間の合意・約束を確認する書面',
+      text:'合　意　書\n\n○○ ○○（以下「甲」という。）と○○ ○○（以下「乙」という。）は、以下の通り合意した。\n\n第1条（合意の目的）\n甲及び乙は、○○に関して以下の通り合意する。\n\n第2条（甲の義務）\n甲は乙に対し、以下のことを行う。\n①○○\n②○○\n\n第3条（乙の義務）\n乙は甲に対し、以下のことを行う。\n①○○\n②○○\n\n第4条（有効期間）\n本合意書の有効期間は、令和　　年　　月　　日から令和　　年　　月　　日までとする。\n\n第5条（誠実協議）\n本合意書に定めのない事項または本合意書の解釈に疑義が生じた場合は、甲乙誠実に協議して解決するものとする。\n\n以上の通り合意したので、本書2通を作成し、甲乙各1通を保有する。\n\n令和　　年　　月　　日\n\n甲　住所：\n　　氏名：　　　　　　　　　　　　㊞\n\n乙　住所：\n　　氏名：　　　　　　　　　　　　㊞' }
+  ]}
+];
+
+let activeTab='template', activeCat='契約書類', selTmpl=null;
+
+// タブ切替
+const tabBtns=document.querySelectorAll('.tb');
+const panes={template:document.getElementById('tab-template'),layout:document.getElementById('tab-layout'),words:document.getElementById('tab-words'),govForm:document.getElementById('tab-govForm')};
+function switchTab(t){
+  activeTab=t;
+  tabBtns.forEach(b=>b.classList.toggle('act',b.dataset.tab===t));
+  Object.entries(panes).forEach(([k,el])=>el.classList.toggle('dn',k!==t));
+}
+tabBtns.forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+
+// テンプレート描画
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+const colorCls={blue:{cb:'ab',bdg:'bdb'},purple:{cb:'ap',bdg:'bdp'},green:{cb:'ag',bdg:'bdg2'}};
+function renderCats(){
+  document.getElementById('catList').innerHTML=TEMPLATES.map(cat=>{
+    const c=colorCls[cat.color];
+    return`<button class="cb${activeCat===cat.category?' '+c.cb:''}" data-cat="${cat.category}">
+      <span>${cat.category}</span><span class="bdg ${c.bdg}">${cat.items.length}件</span>
+    </button>`;
+  }).join('');
+  document.querySelectorAll('.cb').forEach(b=>b.addEventListener('click',()=>{activeCat=b.dataset.cat;selTmpl=null;renderCats();renderArea();}));
+}
+function renderArea(){
+  const cat=TEMPLATES.find(c=>c.category===activeCat);
+  if(!cat){document.getElementById('tmplArea').innerHTML='';return;}
+  const cards=cat.items.map(t=>`<button class="tc${selTmpl&&selTmpl.name===t.name?' sel':''}" data-name="${esc(t.name)}">
+    <div class="tc-n">${esc(t.name)}</div><div class="tc-d">${esc(t.desc)}</div>
+  </button>`).join('');
+  const preview=selTmpl?`<div class="tp">
+    <div class="tp-h"><div class="tp-ht">${esc(selTmpl.name)} — プレビュー</div>
+    <button class="btn-use" id="useBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>このテンプレートを使う</button></div>
+    <pre>${esc(selTmpl.text)}</pre></div>`:'';
+  document.getElementById('tmplArea').innerHTML=`<div class="tcs">${cards}</div>${preview}`;
+  document.querySelectorAll('.tc').forEach(b=>b.addEventListener('click',()=>{selTmpl=cat.items.find(i=>i.name===b.dataset.name);renderArea();}));
+  const ub=document.getElementById('useBtn');
+  if(ub)ub.addEventListener('click',()=>{
+    document.getElementById('in-l').value=selTmpl.text;
+    document.getElementById('out-l').value='';
+    document.getElementById('eh-l').style.display='';
+    document.getElementById('cov-l').classList.add('dn');
+    document.getElementById('cp-l').disabled=true;
+    switchTab('layout');
+  });
+}
+renderCats();renderArea();
+document.getElementById('logoBtn').addEventListener('click',()=>{activeCat='契約書類';selTmpl=null;renderCats();renderArea();switchTab('template');});
+
+// 整形処理
+function fmtLayout(txt){
+  return txt.split('\n').map(line=>{
+    let t=line.replace(/^[ \t　]+/,'');
+    if(!t)return'';
+    let lv=0;
+    if(/^第[一二三四五六七八九十百千0-9０-９]+[章節条]/.test(t))lv=0;
+    else if(/^[0-9０-９]+[\.．\s]/.test(t)||/^第[一二三四五六七八九十百千0-9０-９]+項/.test(t))lv=1;
+    else if(/^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮]/.test(t)||/^[0-9０-９]+[)）]/.test(t)||/^第[一二三四五六七八九十百千0-9０-９]+号/.test(t))lv=2;
+    else if(/^[(（]?[ア-ンあ-ん][)）]?[、\.\s]/.test(t)||/^[ア-ンあ-ん][、\.]/.test(t))lv=3;
+    else lv=1;
+    return'　'.repeat(lv)+t;
+  }).join('\n');
+}
+function fmtWords(txt){
+  let r=txt;
+  const k=document.getElementById('rKou').value,o=document.getElementById('rOtsu').value;
+  if(k)r=r.replace(/甲/g,k);
+  if(o)r=r.replace(/乙/g,o);
+  if(document.getElementById('fixK').checked)
+    r=r.replace(/及び/g,'および').replace(/並びに/g,'ならびに').replace(/又は/g,'または').replace(/若しくは/g,'もしくは').replace(/従って/g,'したがって').replace(/但し/g,'ただし');
+  return r;
+}
+function fmtGov(txt){
+  const lim=parseInt(document.getElementById('cpl').value,10);
+  if(isNaN(lim)||lim<1)return txt;
+  const flat=txt.replace(/\n/g,'');
+  let out='';
+  for(let i=0;i<flat.length;i+=lim)out+=flat.substring(i,i+lim)+'\n';
+  return out.trim();
+}
+
+function setupProc(procId,inId,outId,ehId,covId,cpId,fmt){
+  document.getElementById(procId).addEventListener('click',()=>{
+    const inp=document.getElementById(inId).value;
+    if(!inp.trim())return;
+    const out=fmt(inp);
+    document.getElementById(outId).value=out;
+    document.getElementById(ehId).style.display='none';
+    document.getElementById(covId).classList.add('dn');
+    document.getElementById(cpId).disabled=false;
+  });
+}
+setupProc('proc-l','in-l','out-l','eh-l','cov-l','cp-l',fmtLayout);
+setupProc('proc-w','in-w','out-w','eh-w','cov-w','cp-w',fmtWords);
+setupProc('proc-g','in-g','out-g','eh-g','cov-g','cp-g',fmtGov);
+
+// コピー
+const COPY_ICON='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> コピー';
+const CHECK_ICON='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> コピー完了';
+function setupCopy(cpId,outId,covId){
+  document.getElementById(cpId).addEventListener('click',async()=>{
+    const txt=document.getElementById(outId).value;
+    if(!txt)return;
+    try{await navigator.clipboard.writeText(txt);}
+    catch{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch{}document.body.removeChild(ta);}
+    const btn=document.getElementById(cpId),cov=document.getElementById(covId);
+    btn.classList.add('ok');btn.innerHTML=CHECK_ICON;
+    cov.classList.remove('dn');
+    setTimeout(()=>{cov.classList.add('dn');btn.classList.remove('ok');btn.innerHTML=COPY_ICON;},2500);
+  });
+}
+setupCopy('cp-l','out-l','cov-l');
+setupCopy('cp-w','out-w','cov-w');
+setupCopy('cp-g','out-g','cov-g');
+
+// モーダル
+function openM(id){document.getElementById(id).classList.remove('dn');}
+function closeM(id){document.getElementById(id).classList.add('dn');}
+document.getElementById('openGuideBtn').addEventListener('click',()=>openM('guideModal'));
+document.getElementById('closeGuide').addEventListener('click',()=>closeM('guideModal'));
+document.getElementById('guideModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('guideModal');});
+document.getElementById('openSettingsBtn').addEventListener('click',()=>openM('settingsModal'));
+document.getElementById('closeSettings').addEventListener('click',()=>closeM('settingsModal'));
+document.getElementById('settingsModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('settingsModal');});
+
+// デモ・クリア
+const DEMO={l:'第1条（目的）\n本契約は、委託者○○株式会社（以下「甲」という。）と受託者○○株式会社（以下「乙」という。）との間で、甲が乙に委託するシステム開発業務に関する基本的事項を定めることを目的とする。\n第2条（委託業務の範囲）\n甲が乙に委託する業務の範囲は、別紙「業務仕様書」に定める通りとする。\n2 乙は、善良なる管理者の注意をもって本業務を遂行しなければならない。\n3 乙は、本業務の遂行にあたり、甲の事前の書面による承諾なく、第三者に再委託してはならない。',w:'甲及び乙は、本契約の目的を達成するため、相互に誠実に協力する義務を負う。\n甲又は乙のいずれかが本契約の条項に違反した場合、他方当事者は書面により催告した上で本契約を解除することができる。但し、相手方が破産手続の開始決定を受けた場合は、催告を要せず直ちに解除できる。',g:'本件補助金の交付申請にあたり、申請者である当社は令和○年○月○日に事業計画を策定し、同年○月○日に関係機関との事前協議を経た上で、本申請書を提出するものであります。当社は○○県○○市において○○事業を営む中小企業であり、今般の設備投資により生産効率を30％向上させるとともに、新規雇用を5名創出することを計画しております。'};
+const tabKey={layout:'l',words:'w',govForm:'g'};
+function showMsg(txt,type){const el=document.getElementById('smsg');el.textContent=txt;el.className=`smsg ${type}`;setTimeout(()=>{el.className='smsg hid';},3000);}
+document.getElementById('loadDemo').addEventListener('click',()=>{
+  const k=tabKey[activeTab];
+  if(k&&DEMO[k]){
+    document.getElementById(`in-${k}`).value=DEMO[k];
+    document.getElementById(`out-${k}`).value='';
+    document.getElementById(`eh-${k}`).style.display='';
+    document.getElementById(`cov-${k}`).classList.add('dn');
+    document.getElementById(`cp-${k}`).disabled=true;
+  }
+  showMsg('デモデータをセットしました。','suc');
+});
+document.getElementById('clearData').addEventListener('click',()=>{
+  ['l','w','g'].forEach(k=>{
+    document.getElementById(`in-${k}`).value='';
+    document.getElementById(`out-${k}`).value='';
+    document.getElementById(`eh-${k}`).style.display='';
+    document.getElementById(`cov-${k}`).classList.add('dn');
+    document.getElementById(`cp-${k}`).disabled=true;
+  });
+  showMsg('データをクリアしました。','inf');
+});
+</script>
 </body>
 </html>
